@@ -1,0 +1,883 @@
+SQL*Plus: Release 19.0.0.0.0 - Production on Thu Jan 11 09:35:06 2024
+Version 19.3.0.0.0
+
+Copyright (c) 1982, 2019, Oracle.  All rights reserved.
+
+Enter user-name: A9@cseorcl
+Enter password:
+Last Successful login time: Thu Jan 11 2024 14:13:49 +05:30
+
+Connected to:
+Oracle Database 12c Enterprise Edition Release 12.1.0.2.0 - 64bit Production
+With the Partitioning, OLAP, Advanced Analytics and Real Application Testing options
+
+SQL> create table employee(EmpNo numeric(2),EmpName varchar(30),Gender varchar(30),Salary numeric(6,2),Adress varchar(30),Dno numeric(2));
+create table employee(EmpNo numeric(2),EmpName varchar(30),Gender varchar(30),Salary numeric(6,2),Adress varchar(30),Dno numeric(2))
+             *
+ERROR at line 1:
+ORA-00955: name is already used by an existing object
+
+
+SQL> alter table employee add constraint primkey_employee primary key(EmpNo);
+alter table employee add constraint primkey_employee primary key(EmpNo)
+                                                     *
+ERROR at line 1:
+ORA-02260: table can have only one primary key
+
+
+SQL> select table_name from user_tables
+  2  ;
+
+TABLE_NAME
+--------------------------------------------------------------------------------
+ACCOUNT
+BRANCH
+CUSTOMER
+DEPARTMENT
+EMPLOYEE
+
+SQL> alter table employee add constraint primkey_employee primary key(EmpNo);
+alter table employee add constraint primkey_employee primary key(EmpNo)
+                                                     *
+ERROR at line 1:
+ORA-02260: table can have only one primary key
+
+
+SQL> alter table employee modify Gender varchar(30) not null;
+alter table employee modify Gender varchar(30) not null
+                            *
+ERROR at line 1:
+ORA-01442: column to be modified to NOT NULL is already NOT NULL
+
+
+SQL> alter table employee modify Salary numeric(6,2) not null;
+alter table employee modify Salary numeric(6,2) not null
+                            *
+ERROR at line 1:
+ORA-01442: column to be modified to NOT NULL is already NOT NULL
+
+
+SQL> alter table employee modify Adress varchar(30) not null;
+alter table employee modify Adress varchar(30) not null
+                            *
+ERROR at line 1:
+ORA-01442: column to be modified to NOT NULL is already NOT NULL
+
+
+SQL> alter table employee add constraint check_emp check(Gender in('M','F'));
+alter table employee add constraint check_emp check(Gender in('M','F'))
+                                    *
+ERROR at line 1:
+ORA-02264: name already used by an existing constraint
+
+
+SQL> alter table department add constraint pk_dept primary key(DeptNo);
+alter table department add constraint pk_dept primary key(DeptNo)
+                                              *
+ERROR at line 1:
+ORA-02260: table can have only one primary key
+
+
+SQL> alter table department add constraint ck_dept unique(DeptName);
+
+Table altered.
+
+SQL> alter table employee add constraint fk_emp foriegn key(Dno) reference Department
+  2  ;
+alter table employee add constraint fk_emp foriegn key(Dno) reference Department
+                                                       *
+ERROR at line 1:
+ORA-01735: invalid ALTER TABLE option
+
+
+SQL> alter table employee add constraint fk_emp foriegn key(Dno) references Department(DeptNo);
+alter table employee add constraint fk_emp foriegn key(Dno) references Department(DeptNo)
+                                                       *
+ERROR at line 1:
+ORA-01735: invalid ALTER TABLE option
+
+
+SQL> alter table employee add constraint fk_emp foreign key(Dno) references Department(DeptNo);
+
+Table altered.
+
+SQL> insert into department values(1,'CSE','AB5');
+
+1 row created.
+
+SQL> insert into department values(2,'AIML','AB5');
+
+1 row created.
+
+SQL> insert into department values(3,'IT','AB5');
+
+1 row created.
+
+SQL> insert into department values(4,'CCE','AB5');
+
+1 row created.
+
+SQL> insert into department values(5,'ECE','AB5');
+
+1 row created.
+
+SQL> commit;
+
+Commit complete.
+
+SQL> insert into employee values(1,'A','M',1234.56,'Manipal',1);
+
+1 row created.
+
+SQL> insert into employee values(2,'A','M',3456.78,'udupi',3);
+
+1 row created.
+
+SQL> insert into employee values(3,'A','M',2345.56,'Manglore',2);
+
+1 row created.
+
+SQL> insert into employee values(4,'A','M',5678.90,'Manglore',5);
+
+1 row created.
+
+SQL> insert into employee values(5,'A','M',4532.76,'Manglore',2);
+
+1 row created.
+
+SQL> commit;
+
+Commit complete.
+
+SQL> insert into employee values(1,'A','Male',1234.56,'Manipal',1);
+insert into employee values(1,'A','Male',1234.56,'Manipal',1)
+*
+ERROR at line 1:
+ORA-02290: check constraint (A9.CHECK_EMP) violated
+
+
+SQL> insert into employee values(6,'A','M',1234.56,'Manipal',6);
+insert into employee values(6,'A','M',1234.56,'Manipal',6)
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (A9.FK_EMP) violated - parent key not found
+
+
+SQL> insert into employee values(1,'A','M',null,'Manipal',1);
+insert into employee values(1,'A','M',null,'Manipal',1)
+                                      *
+ERROR at line 1:
+ORA-01400: cannot insert NULL into ("A9"."EMPLOYEE"."SALARY")
+
+
+SQL> delete from department where DeptNO=2;
+delete from department where DeptNO=2
+*
+ERROR at line 1:
+ORA-02292: integrity constraint (A9.FK_EMP) violated - child record found
+
+
+SQL> alter table employee add constraint fkdele_dept foreign key(Dno) references department(DeptNO)no delete cascade;
+alter table employee add constraint fkdele_dept foreign key(Dno) references department(DeptNO)no delete cascade
+                                                                                              *
+ERROR at line 1:
+ORA-00933: SQL command not properly ended
+
+
+SQL> alter table employee add constraint fkdele_dept foreign key(Dno) references department(DeptNO) no delete cascade;
+alter table employee add constraint fkdele_dept foreign key(Dno) references department(DeptNO) no delete cascade
+                                                                                               *
+ERROR at line 1:
+ORA-00933: SQL command not properly ended
+
+
+SQL> alter table employee add constraint fkdele_dept foreign key(Dno) references department(DeptNO) on delete cascade;
+alter table employee add constraint fkdele_dept foreign key(Dno) references department(DeptNO) on delete cascade
+                                                *
+ERROR at line 1:
+ORA-02275: such a referential constraint already exists in the table
+
+
+SQL> alter table employee drop constraint fk_emp
+  2  ;
+
+Table altered.
+
+SQL> alter table employee add constraint fkdele_dept foreign key(Dno) references department(DeptNO) on delete cascade;
+
+Table altered.
+
+SQL> alter table employee modify salary numeric(7,2) default 10000;
+alter table employee modify salary numeric(7,2) default 10000
+                            *
+ERROR at line 1:
+ORA-01440: column to be modified must be empty to decrease precision or scale
+
+
+SQL> alter table employee modify salary numeric(7,2) default 10000.00;
+alter table employee modify salary numeric(7,2) default 10000.00
+                            *
+ERROR at line 1:
+ORA-01440: column to be modified must be empty to decrease precision or scale
+
+
+SQL> alter table employee modify salary numeric(7,2) default 10000.0;
+alter table employee modify salary numeric(7,2) default 10000.0
+                            *
+ERROR at line 1:
+ORA-01440: column to be modified must be empty to decrease precision or scale
+
+
+SQL> alter table employee modify salary numeric(7,2) default(10000.0);
+alter table employee modify salary numeric(7,2) default(10000.0)
+                            *
+ERROR at line 1:
+ORA-01440: column to be modified must be empty to decrease precision or scale
+
+
+SQL> alter table employee modify Salary numeric(7,2) default(10000.0);
+alter table employee modify Salary numeric(7,2) default(10000.0)
+                            *
+ERROR at line 1:
+ORA-01440: column to be modified must be empty to decrease precision or scale
+
+
+SQL> desc employee
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ EMPNO                                     NOT NULL NUMBER(2)
+ EMPNAME                                   NOT NULL VARCHAR2(30)
+ GENDER                                    NOT NULL VARCHAR2(30)
+ SALARY                                    NOT NULL NUMBER(30)
+ ADRESS                                    NOT NULL VARCHAR2(30)
+ DNO                                                NUMBER(2)
+
+SQL> alter table employee modify salary numeric(30) default(10000.0);
+
+Table altered.
+
+SQL> alter table employee modify Salary numeric(6,2) not null;
+alter table employee modify Salary numeric(6,2) not null
+                            *
+ERROR at line 1:
+ORA-01442: column to be modified to NOT NULL is already NOT NULL
+
+
+SQL> rename departmant to department1;
+rename departmant to department1
+*
+ERROR at line 1:
+ORA-04043: object DEPARTMANT does not exist
+
+
+SQL> rename department to department1;
+
+Table renamed.
+
+SQL> @"C:\Users\ugcse.PG-CP.000\Desktop\220962019\University.sql"
+drop table prereq
+           *
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+drop table time_slot
+           *
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+drop table advisor
+           *
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+drop table takes
+           *
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+drop table student
+           *
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+drop table teaches
+           *
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+drop table section
+           *
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+drop table instructor
+           *
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+drop table course
+           *
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+drop table department
+           *
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+drop table classroom
+           *
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+
+Table created.
+
+SQL> @"C:\Users\ugcse.PG-CP.000\Desktop\220962019\smallRelations.sql"
+
+0 rows deleted.
+
+
+0 rows deleted.
+
+
+0 rows deleted.
+
+
+0 rows deleted.
+
+
+0 rows deleted.
+
+
+0 rows deleted.
+
+
+0 rows deleted.
+
+
+0 rows deleted.
+
+
+0 rows deleted.
+
+
+0 rows deleted.
+
+
+0 rows deleted.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+
+1 row created.
+
+SQL> select name,deptname from student;
+select name,deptname from student
+            *
+ERROR at line 1:
+ORA-00904: "DEPTNAME": invalid identifier
+
+
+SQL> select name,dept_name from student;
+
+NAME                 DEPT_NAME
+-------------------- --------------------
+Zhang                Comp. Sci.
+Shankar              Comp. Sci.
+Brandt               History
+Chavez               Finance
+Peltier              Physics
+Levy                 Physics
+Williams             Comp. Sci.
+Sanchez              Music
+Snow                 Physics
+Brown                Comp. Sci.
+Aoi                  Elec. Eng.
+
+NAME                 DEPT_NAME
+-------------------- --------------------
+Bourikas             Elec. Eng.
+Tanaka               Biology
+
+13 rows selected.
+
+SQL> select name from instructor where dept_name='CSE';
+
+no rows selected
+
+SQL>
+SQL> select name from instructor where dept_name='Comp. Sci.';
+
+NAME
+--------------------
+Srinivasan
+Katz
+Brandt
+
+SQL> select title from course where dept_name='Comp. Sci.' and credit=3;
+select title from course where dept_name='Comp. Sci.' and credit=3
+                                                          *
+ERROR at line 1:
+ORA-00904: "CREDIT": invalid identifier
+
+
+SQL> select title from course where dept_name='Comp. Sci.' and credits=3;
+
+TITLE
+--------------------------------------------------
+Robotics
+Image Processing
+Database System Concepts
+
+SQL>
