@@ -72,7 +72,7 @@ commit;
 select Branch_name from Branch where assets>10000;
 select * from Customer where Customer_city='manipal';
 alter table Branch add working_hours numeric(2);
-update Branch set working_hours=9 where Branch_city='manipal';
+update Branch set working_hours=9 where Branch_city='banglore';
 drop table Account
 drop table Branch
 drop table Customer
