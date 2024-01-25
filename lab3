@@ -1,0 +1,96 @@
+1.
+select course_id from section where semester='Fall' and year=2009
+UNION ALL
+select course_id from section where semester='Spring' and year=2010; 
+COURSE_I
+--------
+CS-101
+CS-347
+PHY-101
+CS-101
+CS-315
+CS-319
+CS-319
+FIN-201
+HIS-351
+MU-199
+
+10 rows selected.
+2.
+select course_id from section where semester='Fall' and year=2009
+INTERSECT
+select course_id from section where semester='Spring' and year=2010;
+COURSE_I
+--------
+CS-101  	
+3.
+select course_id from section where semester='Fall' and year=2009
+MINUS
+select course_id from section where semester='Spring' and year=2010;
+
+COURSE_I
+--------
+CS-347
+PHY-101
+
+
+4.select course_id from course
+MINUS
+select course_id from takes; 
+COURSE_I
+--------
+BIO-399
+
+5.
+select course_id from section where semester='Fall' and year=2009 and course_id in (select course_id from section where semester='Spring' and year=2010);
+COURSE_I
+--------
+CS-101
+
+
+6.
+select count(distinct id) from takes t where course_id in (select course_id from teaches t1 where t1.id=10101);
+COUNT(DISTINCTID)
+-----------------
+                6
+
+7.
+select course_id from section where semester='Fall' and year=2009 and course_id not in (select course_id from section where semester='Spring' and year=2010);
+COURSE_I
+--------
+CS-347
+PHY-101
+
+8.
+select name form student where name in(select name from instructor);
+NAME
+--------------------
+Brandt
+
+9.
+select name from instructor where salary > some (select salary from instructor where dept_name='Biology');
+Wu
+Einstein
+Gold
+Katz
+Singh
+Brandt
+Kim
+
+7 rows selected.
+
+10.
+select name from instructor where salary > all (select salary from instructor where dept_name='Biology');
+Katz
+Singh
+Kim
+Gold
+Wu
+Brandt
+Einstein
+
+7 rows selected.
+
+11.
+
+
