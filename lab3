@@ -92,5 +92,24 @@ Einstein
 7 rows selected.
 
 11.
+12.
+SQL> select dept_name from department d where budget < all(select avg(salary) from in
+structor i);
+
+DEPT_NAME
+--------------------
+History
+Physics
+
+13.
+ select course_id from section s where semester='Fall' and year=2009 and exists(select course_id from section s where semester='Spring' and year=2010);
+
+COURSE_I
+--------
+CS-101
+CS-347
+PHY-101
+
+
 
 
