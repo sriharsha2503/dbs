@@ -91,7 +91,17 @@ Einstein
 
 7 rows selected.
 
-11.
+11.select dept_name
+	from Instructor
+	group by dept_name
+having avg(salary) >= all
+	(select avg(salary)
+	from Instructor
+	group by dept_name);
+DEPT_NAME
+--------------------
+Physics
+
 12.
 SQL> select dept_name from department d where budget < all(select avg(salary) from in
 structor i);
@@ -109,6 +119,8 @@ COURSE_I
 CS-101
 CS-347
 PHY-101
+
+
 
 
 
