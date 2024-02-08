@@ -1,0 +1,144 @@
+1. Retrieve the birth date and address of the employee(s) whose name is ‘John B. 
+Smith’.
+ >>select bdate,address from employee where fname='John' and minit='B' and lname='Smith';
+
+BDATE     ADDRESS
+--------- ------------------------------
+09-JAN-65 731 Fondren, Houston, TX
+
+
+2.Retrieve the name and address of all employees who work for the 
+‘Research’ department.
+>>  select e.fname,e.address from employee e join department d on (e.dno=d.dnumber) where dno=5;
+
+FNAME           ADDRESS
+--------------- ------------------------------
+John            731 Fondren, Houston, TX
+Franklin        638 Voss, Houston, TX
+Ramesh          975 Fire Oak, Humble, TX
+Joyce           5631 Rice, Houston, TX
+
+
+3. For every project located in ‘Stafford’, list the project number, the controlling department number, and the department manager’s last name, address, and birth date.
+
+   select p.pnumber,dnum,e.fname,e.address,e.lname,e.address,e.bdate from project p join department d on (dnum=dnumber) join employee e on (e.ssn=d.mgr_ssn) where p.plocation='Stafford';
+
+   PNUMBER       DNUM FNAME           ADDRESS                        LNAME           ADDRESS                        BDATE
+---------- ---------- --------------- ------------------------------ --------------- ------------------------------ ---------
+        10          4 Jennifer        291 Berry, Bellaire, TX        Wallace         291 Berry, Bellaire, TX        20-JUN-41
+
+
+
+4.For each employee, retrieve the employee’s first and last name and the first and last name of his or her immediate supervisor.
+select e1.fname,e1.lname,e2.fname,e2.lname from employee e1 join employee e2 on(e1.ssn=e2.super_ssn);
+
+FNAME           LNAME           FNAME           LNAME
+--------------- --------------- --------------- ---------------
+Richard         Marini          Richard         Marini
+Franklin        Wong            John            Smith
+James           Borg            Franklin        Wong
+Jennifer        Wallace         Alicia          Zelaya
+James           Borg            Jennifer        Wallace
+Franklin        Wong            Ramesh          Narayan
+Franklin        Wong            Joyce           English
+Jennifer        Wallace         Ahmad           Jabbar
+
+8 rows selected.
+
+
+5.Make a list of all project numbers for projects that involve an employee whose 
+last name is ‘Smith’, either as a worker or as a manager of the department that
+controls the project.
+ select pnumber from project p join department d on (p.dnum=d.dnumber) join employee e on (e.Dno=d.Dnumber) where e.lname='Smith';
+
+   PNUMBER
+----------
+         1
+         2
+         3
+
+
+6.Show the resulting salaries if every employee working on the ‘ProductX’ project 
+is given a 10 percent raise.
+ select e.fname,e.lname,salary*1.1 from project p join employee e on(e.Dno=p.Dnum) where p.pname='ProductX';
+
+FNAME           LNAME           SALARY*1.1
+--------------- --------------- ----------
+John            Smith                33000
+Franklin        Wong                 44000
+Ramesh          Narayan              41800
+Joyce           English              27500
+
+
+7. Retrieve a list of employees and the projects they are working on, ordered by 
+department and, within each department, ordered alphabetically by last name, then 
+first name.
+
+
+
+
+
+
+8.Retrieve the name of each employee who has a dependent with the same first name 
+and is the same sex as the employee.
+select * from employee e join dependent d on (e.ssn=d.essn) where d.dependent_name=e.fname and e.sex=d.sex;
+
+no rows selected
+
+9.. Retrieve the names of employees who have no dependents.
+  select fname,lname from employee where ssn not in (select ssn from employee e join dependent d on (e.ssn=d.essn));
+
+FNAME           LNAME
+--------------- ---------------
+Richard         Marini
+Ahmad           Jabbar
+Alicia          Zelaya
+James           Borg
+Joyce           English
+Ramesh          Narayan
+
+6 rows selected.
+
+
+10.List the names of managers who have at least one dependent.
+ select fname,lname from employee join department on employee.ssn=department.mgr_ssn where ssn in (select ssn from employee e join d
+ependent d on (e.ssn=d.essn));
+
+FNAME           LNAME
+--------------- ---------------
+Franklin        Wong
+Jennifer        Wallace
+
+11.Find the sum of the salaries of all employees, the maximum salary, the minimum 
+salary, and the average salary
+
+ select sum(salary),max(salary),min(salary),avg(salary) from employee;
+
+SUM(SALARY) MAX(SALARY) MIN(SALARY) AVG(SALARY)
+----------- ----------- ----------- -----------
+     318000       55000       25000  35333.3333
+
+
+12. For each project, retrieve the project number, the project name, and the number 
+of employees who work on that project.
+ select pnumber,pname,count(pnumber) from project join works_on on (pnumber=pno) group by pnumber,pname order by pnumber;
+
+   PNUMBER PNAME           COUNT(PNUMBER)
+---------- --------------- --------------
+         1 ProductX                     2
+         2 ProductY                     3
+         3 ProductZ                     2
+        10 Computerization              3
+        20 Reorganization               3
+        30 Newbenefits                  3
+
+6 rows selected.
+
+13. For each project on which more than two employees work, retrieve the project 
+number, the project name, and the number of employees who work on the 
+project.
+
+
+
+
+
