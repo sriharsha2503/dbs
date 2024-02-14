@@ -137,6 +137,22 @@ of employees who work on that project.
 13. For each project on which more than two employees work, retrieve the project 
 number, the project name, and the number of employees who work on the 
 project.
+select Project.pnumber, pname, count (*) from Project join Works_on on Project.pnumber = Works_on.pno group by
+project.pnumber, pname having count(*)>2 order by project.pnumber;
+
+   PNUMBER PNAME             COUNT(*)
+---------- --------------- ----------
+         2 ProductY                 3
+        10 Computerization          3
+        20 Reorganization           3
+        30 Newbenefits              3
+
+14.For each department that has more than five employees, retrieve the department
+number and the number of its employees who are making more than 40,000.
+select dname, count(*) from Department, employee where Department.dnumber = employee.dno and salary >40000 and
+department.dnumber in (select dnumber from employee group by dnumber having count(*) > 5) group by dname;
+
+no rows selected.
 
 
 
