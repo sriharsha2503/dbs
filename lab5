@@ -50,6 +50,7 @@ Jennifer        Wallace         Ahmad           Jabbar
 last name is ‘Smith’, either as a worker or as a manager of the department that
 controls the project.
  select pnumber from project p join department d on (p.dnum=d.dnumber) join employee e on (e.Dno=d.Dnumber) where e.lname='Smith';
+ 
 
    PNUMBER
 ----------
