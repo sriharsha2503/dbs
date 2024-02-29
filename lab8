@@ -1,0 +1,86 @@
+set serveroutput on
+drop table salary_raise;
+
+CREATE TABLE salary_raise(
+  Instructor_ID NUMBER(5),
+  Raise_date DATE,
+  Raise_amt NUMERIC(10,2)
+);
+
+DECLARE
+dname instructor.dept_name%TYPE := '&dept_name';
+  CURSOR raise_cursor IS
+    SELECT * FROM Instructor where dept_name=dname;
+    
+  raise_amt NUMERIC(8, 2);
+
+BEGIN
+
+    FOR i IN raise_cursor
+    LOOP
+		raise_amt := i.salary * 0.05;
+		INSERT INTO salary_raise VALUES (i.ID, CURRENT_DATE, raise_amt);
+    END LOOP;
+END;
+/
+
+SELECT * FROM salary_raise;
+
+--Enter value for dept_name: Finance
+--old   2: dname instructor.dept_name%TYPE := '&dept_name';
+--new   2: dname instructor.dept_name%TYPE := 'Finance';
+
+--PL/SQL procedure successfully completed.
+
+
+--INSTRUCTOR_ID RAISE_DAT  RAISE_AMT
+-- ------------- --------- ----------
+--        12121 29-FEB-24       4500
+--        76543 29-FEB-24       4000
+set serveroutput on
+DECLARE
+	CURSOR curs is select * from student order by tot_cred;
+	
+BEGIN
+	for s in curs
+        loop
+   	EXIT WHEN (curs%ROWCOUNT > 10) OR (curs%NOTFOUND);
+   	dbms_output.put_line(s.id || ' ' || s.name || ' ' || s.dept_name
+   	|| ' ' || s.tot_cred);
+   	END LOOP;
+END;
+/
+
+--output:=
+--70557 Snow Physics 0
+--12345 Shankar Comp. Sci. 32
+--55739 Sanchez Music 38
+--45678 Levy Physics 46
+--54321 Williams Comp. Sci. 54
+--44553 Peltier Physics 56
+--76543 Brown Comp. Sci. 58
+--76653 Aoi Elec. Eng. 60
+--19991 Brandt History 80
+--98765 Bourikas Elec. Eng. 98
+
+--PL/SQL procedure successfully completed.
+set serveroutput on 
+declare
+    cursor disp_curs is with stud as (select * from (student natural join takes natural join section)),ins as (select * from (instructor natural join teaches natural join section))
+                select course_id,title,ins.dept_name,credits,ins.name,ins.building,ins.room_number,ins.time_slot_id,count(*) as no_of_students from stud inner join  ins using(course_id,sec_id,semester,year) natural join course
+                group by (course_id,title,ins.dept_name,credits,ins.name,ins.building,ins.room_number,ins.time_slot_id);
+begin
+    for temp in disp_curs
+        loop
+            dbms_output.put_line('Course ID : '|| temp.course_id);
+            dbms_output.put_line('Title : '|| temp.title);
+            dbms_output.put_line('Department : '|| temp.dept_name);
+            dbms_output.put_line('Credits : '|| temp.credits);
+            dbms_output.put_line('Instructor Name : '|| temp.name);
+            dbms_output.put_line('Building : '|| temp.building);
+            dbms_output.put_line('Room Number : '|| temp.room_number);
+            dbms_output.put_line('Time Slot ID : '|| temp.time_slot_id);
+            dbms_output.put_line('Total Students : '|| temp.no_of_students);
+        end loop;
+end;
+/
