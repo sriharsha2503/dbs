@@ -74,6 +74,7 @@ Joyce           English              27500
 7. Retrieve a list of employees and the projects they are working on, ordered by 
 department and, within each department, ordered alphabetically by last name, then 
 first name.
+select e.fname,e.minit,e.lname,p.pname from employee e,project p,department d where e.dno=p.dnum and e.dno=d.dnumber and p.dnum=d.dnumber order by d.dname,e.lname,e.fname;
 
 
 
