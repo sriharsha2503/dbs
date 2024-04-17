@@ -1,295 +1,193 @@
----EXAMPLE FUNCTION---
+Lab 9
 
-set serveroutput on;
 
-create or replace 
-function count_book(bk_subject varchar)
-return number as 
-bk_count number;
 
-begin
-select count(*) into bk_count from book where subject=bk_subject;
-
-return bk_count;
-
-end;
-/
-
-begin
-dbms_output.put_line('Number of books"||count_book('&Subject'));
-end;
-/
-
----EXAMPLE PROCEDURE---
+ Q1
 set serveroutput on;
 create or replace
-procedure display_hello(nam varchar) is 
-p1_name varchar(20);
+procedure display is
 begin
-p1_name:=nam;
-dbms_output.put_line('Hello '||p1_name);
+dbms_output.put_line('Good Day To You');
 end;
 /
 
-set serveroutput on;
+set serveroutput on
 declare
 begin
-display_hello('&Name');
+display();
 end;
 /
 
----------------------------------------
-1.
-
+Q2
 set serveroutput on;
-create or replace
-procedure greeting is
+create or replace procedure dept_inst_courses(dname varchar) is
+cursor inst is (select name from instructor where dept_name=dname);
+cursor course is (select title from course where dept_name=dname);
 begin
-dbms_output.put_line('Good Day to you');
-end;
-/
-
-begin
-greeting;
-end;
-/
-
-
----------------------
-2.
-
-set serveroutput on;
-
-create or replace
-procedure list_names(dname varchar) is
-cursor c1 is select * from (instructor natural join course) where dept_name=dname;
-
-begin
-for rec in c1
-loop
-dbms_output.put_line('Name:'||rec.name||'Course ID: '||rec.course_id);
-end loop;
-end;
-/
-
-begin
-list_names('&DepartmentName');
-end;
-/
-
-
-Name:El SaidCourse ID: HIS-351
-Name:CalifieriCourse ID: HIS-351
- 
-
----------------------
-3.
-set serveroutput on;
-create or replace
-procedure p(nam varchar) is
-cid varchar(8);
-maxs number :=0;
-begin
-
-	for cr in(select course_id from course where dept_name=nam)
-	loop
-		declare
-			cnt number;
-		begin
-			select count(distinct t.id)
-			into cnt
-			from takes t
-			where t.course_id=cr.course_id;
-
-			if cnt>maxs then
-				maxs := cnt;
-				cid := cr.course_id;
-			end if;
-		end;
+	dbms_output.put_line('Instructors');
+	for i in inst loop
+		dbms_output.put_line(i.name);
 	end loop;
-	dbms_output.put_line('Department = '||nam||' Course = ' ||cid);
-end p;
+	dbms_output.put_line('Courses');
+	for i in course loop
+		dbms_output.put_line(i.title);
+	end loop;
+end;
 /
+set serveroutput on;
 declare
 begin
-	p('&DepartmentName');
+	dept_inst_courses('&Dept_Name');
 end;
 /
 
-Department = Finance Course = FIN-201
-
-
----------------------
-4.
-
+Q3
 set serveroutput on;
-
-create or replace
-procedure list_names(dname varchar) is
-cursor c is select * from (student s join course c on s.dept_name=c.dept_name) where s.dept_name=dname;
-
+create or replace procedure course_popular(dname varchar) is
+mm number := 0;
+cid course.course_id%TYPE;
+cursor c is (select course_id,count(course_id) cc from takes natural join course group by dept_name,course_id having dept_name=dname); 
 begin
-for rec in c
-loop
-dbms_output.put_line('Name:'||rec.name||'Course ID: '||rec.course_id);
-end loop;
+	for i in c loop
+		if i.cc>mm then 
+			mm :=i.cc;
+			cid :=i.course_id;
+		end if;
+	end loop;
+	dbms_output.put_line('Most Popular Course is '||cid);
+end;
+/
+set serveroutput on
+declare
+begin
+	course_popular('&Dept_Name');
 end;
 /
 
+
+Q4
+set serveroutput on;
+create or replace procedure dept_student_courses(dname varchar) is
+cursor stud is (select name from student where dept_name=dname);
+cursor course is (select title from course where dept_name=dname);
 begin
-list_names('&DepartmentName');
+	dbms_output.put_line('Students');
+	for i in stud loop
+		dbms_output.put_line(i.name);
+	end loop;
+	dbms_output.put_line('Courses');
+	for i in course loop
+		dbms_output.put_line(i.title);
+	end loop;
+end;
+/
+set serveroutput on
+declare
+begin
+	dept_student_courses('&Dept_Name');
 end;
 /
 
 
-Name:BrandtCourse ID: HIS-351
-
-
--------------------
-5.
-
-create or replace 
-function square(n number)
+Q5
+set serveroutput on;
+create or replace function sqr(num number) 
 return number as
-n2 number;
-
 begin
-n2:=n*n;
-return n2;
+	return num*num;
 end;
 /
-
+set serveroutput on
 declare
-n number;
-
+num number;
 begin
-n := '&InputNumber';
-dbms_output.put_line('Square of input number = '||square(n));
+	num := '&Number';
+	dbms_output.put_line('Square of '||num||' is '||sqr(num));
 end;
 /
 
-Enter value for inputnumber: 5
-old   5: n := '&InputNumber';
-new   5: n := '5';
-Square of input number = 25
 
-----------------
-6.
 
+
+Q6
 set serveroutput on;
-
-create or replace
-function highest(dname varchar)
-return varchar as
-max_inst_name varchar(20);
-cursor c1 is select * from instructor i where i.dept_name=dname;
-max_sal number;
-
-begin
-max_sal:=0;
-for rec in c1
-loop
-if rec.salary >= max_sal then
-	max_sal:=rec.salary;
-	max_inst_name:=rec.name;
-end if;
-end loop;
-return max_inst_name;
-end;
-/
-
-set serverouput on;
-begin
-dbms_output.put_line('Highest paid instructor :'||highest('&DepartmentName'));
-end;
-/
-
-Highest paid instructor :Wu
-
-----------------
-7.
-set serveroutput on;
-
-create or replace package dept_desc as
-procedure list_names(dname varchar);
-function highest_sal(dname varchar) return number;
-end dept_desc;
-/
-
-
-
-
-create or replace package body dept_desc as 
-procedure list_names(dname varchar) is
-cursor c1 is select * from (instructor i join course c on i.dept_name=c.dept_name) where i.dept_name=dname;
-begin
-for inst in c1
-loop
-dbms_output.put_line('Name:'||inst.name||'Course ID: '||inst.course_id);
-end loop;
-end;
-
-function highest_sal(dname varchar)
+create or replace function dept_highest(dname varchar) 
 return number as
-max_sal number;
-cursor c1 is select * from instructor i where i.dept_name=dname;
-
+inst_max number;
 begin
-max_sal:=0;
-for rec in c1
-loop
-if rec.salary >= max_sal then
-	max_sal:=rec.salary;
-end if;
-end loop;
-return max_sal;
+	select max(salary) into inst_max from instructor where dept_name=dname;
+	return inst_max;
 end;
-end dept_desc;
 /
-
 set serveroutput on;
-
-begin
-dept_desc.list_names('&DepartmentName');
-dbms_output.put_line('Highest salary : '||dept_desc.highest_sal('&DepartmentName'));
-end;
-/
-
-
-Name:El SaidCourse ID: HIS-351
-Name:CalifieriCourse ID: HIS-351
-Highest salary : 62000
-------------------------
-8.
-
-create or replace procedure calculate_interest(
-    p in number,
-    r in number,
-    y in number,
-    si out number,
-    ci out number,
-    s in out number
-) as
-begin
-    si := (p * r * y) / 100;
-
-    ci :=p * (power((1 + r / 100), y) - 1);
-
-    s := p + si + ci;
-end;
-/
-
 declare
-    p number := 1000; -- Principle
-    r number := 5;    -- Rate of interest
-    y number := 3;    -- Number of years
-    si number;        -- Simple interest
-    ci number;        -- Compound interest
-    ts number := 0;   -- Total sum
+cursor c is (select dept_name from department);
 begin
-    calculate_interest(p, r, y, si, ci, ts);
-    dbms_output.put_line('Simple Interest: ' || si);
-    dbms_output.put_line('Compound Interest: ' || ci);
-    dbms_output.put_line('Total Sum: ' || ts);
+	for i in c loop
+		dbms_output.put_line('Maximum Salary of '||i.dept_name||' is '||dept_highest(i.dept_name));
+	end loop;
 end;
 /
+
+
+Q7
+set serveroutput on;
+create or replace package q7 as
+procedure dept_inst(dname varchar);
+
+function dept_highest(dname varchar) 
+return number;
+end q7;
+/
+
+create or replace package body q7 as
+procedure dept_inst(dname varchar) is
+cursor inst is (select name from instructor where dept_name=dname);
+begin
+	dbms_output.put_line('Instructors');
+	for i in inst loop
+		dbms_output.put_line(i.name);
+	end loop;
+end;
+
+function dept_highest(dname varchar) 
+return number as
+inst_max number;
+begin
+	select max(salary) into inst_max from instructor where dept_name=dname;
+	return inst_max;
+end;
+end q7;
+/
+set serveroutput on;
+declare
+cursor c is (select dept_name from department);
+begin
+	for i in c loop
+		q7.dept_inst(i.dept_name);
+		dbms_output.put_line('Maximum Salary of '||i.dept_name||' is '||q7.dept_highest(i.dept_name));
+	end loop;
+end;
+/
+
+
+Q8
+set serveroutput on;
+create or replace procedure simp_comp(principle in number,rate in number,years in number,times in number,SI out numeric,CI out numeric,tot_sum in out numeric) as
+begin
+	SI :=(principle*rate*years)/100;
+	CI :=principle*power((1+rate/times),times*years);
+	tot_sum := principle + SI + CI;
+end;
+/
+set serveroutput on
+declare
+SI numeric(10,2);
+CI numeric(10,2);
+tot_sum numeric(10,2);
+begin
+	simp_comp(10000,5,2,3,SI,CI,tot_sum);
+	dbms_output.put_line('Simple Interest '||SI);
+	dbms_output.put_line('Compound Interest '||CI);
+	dbms_output.put_line('Tot Sum '||tot_sum);
+end
