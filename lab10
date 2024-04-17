@@ -1,108 +1,134 @@
-1->create table log_change_Takes(
-    Time_Of_Change date,
-    id varchar(5),
-    course_id varchar(8),
-    sec_id varchar(8),
-    semester varchar(6),
-    year numeric(4,0),
-    grade varchar(2),
-    primary key (ID, course_id, sec_id, semester, year));
+Lab10
 
-set serveroutput on
-
-create or replace trigger alt_takes_trigger
-before insert or update or delete on takes
+ Q1
+create or replace trigger log_takes_insert_update
+after insert  on takes
 for each row
 begin
-    case
-    when inserting then
-        insert into log_change_Takes
-        values(current_date,:NEW.ID, :NEW.course_id, :NEW.sec_id, :NEW.semester, :NEW.year, :NEW.grade);
-    when updating or deleting then
-        insert into log_change_Takes
-        values(current_date,:OLD.ID, :OLD.course_id, :OLD.sec_id, :OLD.semester, :OLD.year, :OLD.grade);
-    end case;
+case
+	when inserting then
+	insert into log_change_takes values(current_date,:NEW.ID,:NEW.course_id,:NEW.sec_id,:NEW.semester,:NEW.year,:NEW.grade);
+	when updating then
+	insert into log_change_takes values(current_date,:NEW.ID,:NEW.course_id,:NEW.sec_id,:NEW.semester,:NEW.year,:NEW.grade);
+end case;
 end;
 /
 
+create or replace trigger log_takes_update_delete
+before update or delete on takes
+for each row
+begin
+	case
+	when updating then
+	insert into log_change_takes values(current_date,:OLD.ID,:OLD.course_id,:OLD.sec_id,:OLD.semester,:OLD.year,:OLD.grade);
+	when deleting then
+	insert into log_change_takes values(current_date,:OLD.ID,:OLD.course_id,:OLD.sec_id,:OLD.semester,:OLD.year,:OLD.grade);
+end case;
+end;
+/
 
-
-2->create table Old_Data_Instructor(
-    id varchar(5),
-    name varchar(20),
-    dept_name varchar(20),
-    salary numeric(8,2),
-    primary key (ID));
-
-create or replace trigger inst_sal
+Q2
+create or replace trigger log_instructor_salary_update
 before update of salary on instructor
 for each row
 begin
-    insert into Old_Data_Instructor values(:OLD.ID, :OLD.name, :OLD.dept_name, :OLD.salary);
+	insert into old_data_instructor values(:OLD.ID,:OLD.name,:OLD.dept_name,:OLD.salary);
 end;
 /
 
-
-3->create or replace trigger instrInsert
-before insert on instructor
+Q3
+create or replace trigger log_instructor_check
+before insert or update of salary on instructor
 for each row
 declare
-sal number;
-bud number;
+sal instructor.salary%TYPE;
+budg department.budget%TYPE;
 begin
-if length(trim(translate(:NEW.name, '[a-z][A-Z]', ' '))) > 0 then
-    raise_application_error(-20100,'Name must contain only alphabets');
-else
-    if :NEW.salary < 1 then
-        raise_application_error(-20100,'Salary must be greater than 0');
-    else
-        select SUM(salary) into sal from instructor where dept_name = :NEW.dept_name;
-        select budget into bud from department where dept_name = :NEW.dept_name;
-        if sal + :NEW.salary > bud then
-            raise_application_error(-20100,'Not enough department budget');  
-        end if;
-    end if;
-end if;
-end; 
-/
-
-4->create table Client_master (
-    client_no number,
-    name varchar(20),
-    address varchar(50),
-    bal_due number,
-    primary key (client_no));
-
-create table auditclient (
-    client_no number,
-    name varchar(20),
-    bal_due number,
-    operation varchar(20),
-    userid number,
-    opdate date);
-
-create or replace trigger client_trigger
-before update or delete on Client_master
-for each row
-begin
-    case
-    when updating then
-        insert into auditClient values(:OLD.client_no, :OLD.name, :OLD.bal_due, 'Update', 6969, sysdate);
-    when deleting then
-        insert into auditClient values(:OLD.client_no, :OLD.name, :OLD.bal_due, 'Delete', 6969, sysdate);
-    end case;
+	IF LENGTH(TRIM(TRANSLATE(:NEW.name, 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', ' '))) > 0 then
+		RAISE_APPLICATION_ERROR(-20100,'Name must contain only alphabets');
+ELSE
+    IF :NEW.salary < 1 THEN
+        RAISE_APPLICATION_ERROR(-20100,'Salary must be greater than 0');
+    ELSE
+        SELECT SUM(salary) INTO sal FROM instructor WHERE dept_name = :NEW.dept_name;
+        SELECT budget INTO budg FROM department WHERE dept_name = :NEW.dept_name;
+        IF sal + :NEW.salary > budg THEN
+            RAISE_APPLICATION_ERROR(-20100,'Not enough department budget');
+        END IF;
+    END IF;
+END IF;
 end;
 /
 
+Q4
 
-5->create view Advisor_Student as 
-select advisor.s_id, advisor.i_id, student.name s_name, instructor.name i_name
-from advisor, student, instructor where advisor.s_id = student.id and advisor.i_id = instructor.id;
-
-create or replace trigger delAdvisor
-instead of delete on Advisor_Student
+create or replace trigger log_client
+before update or delete on client_master
 for each row
-begin 
-    delete from advisor where s_id = :OLD.s_id and i_id = :OLD.i_id;
+begin
+	case
+	when updating then
+	insert into auditclient values(:OLD.client_no,:OLD.name,:OLD.bal_due,'UPDATE',1,current_date);
+	when deleting then
+	insert into auditclient values(:OLD.client_no,:OLD.name,:OLD.bal_due,'DELETE',1,current_date);
+	end case;
 end;
 /
+
+Q5
+Create or replace trigger advisor_delete
+INSTEAD OF DELETE on Advisor_Student
+FOR EACH ROW
+BEGIN
+delete from advisor where s_id= :OLD.s_id and i_id= :OLD.i_id;
+END;
+/
+
+
+
+Tables that need to be created in sql
+create table log_change_takes
+	(
+	Time_Of_Change date,
+	ID			varchar(5), 
+	 course_id		varchar(8),
+	 sec_id		varchar(8), 
+	 semester		varchar(6),
+	 year			numeric(4,0),
+	 grade		varchar(2),
+	 primary key (ID, course_id, sec_id, semester, year),
+	 foreign key (course_id,sec_id, semester, year) references section on delete cascade,
+	 foreign key (ID) references student on delete cascade
+	);
+	
+create table old_data_instructor
+	(ID			varchar(5), 
+	 name			varchar(20) not null, 
+	 dept_name		varchar(20), 
+	 salary	numeric(8,2) check (salary > 29000),
+	 primary key (ID),
+	 foreign key (dept_name) references department
+		on delete set null
+	);
+	
+create table client_master
+	(
+		client_no numeric(5,0),
+		name varchar(30),
+		address varchar(50),
+		bal_due numeric(10,2)
+	);
+	
+create table auditclient
+	(
+		client_no numeric(5,0),
+		name varchar(30),
+		bal_due numeric(10,2),
+		operation varchar(10),
+		userid numeric(5,0),
+		opdate date
+	);
+	
+CREATE VIEW Advisor_Student AS 
+SELECT Advisor.S_ID, Advisor.I_ID, Student.name S_NAME, Instructor.name I_NAME
+FROM Advisor, Student, Instructor WHERE Advisor.S_ID = Student.ID AND Advisor.I_ID = Instructor.ID;
