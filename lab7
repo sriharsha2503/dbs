@@ -1,46 +1,226 @@
-1 row created.
+Lab7 
+======
 
-SQL> insert into studenttable values(4,7.8);
+TABLES TO BE CREATED:=
+create table studentTable(
+	roll number(2),
+	gpa numeric(4,2));
+insert into studentTable values(1,5.8);
+insert into studentTable values(2,6.5);
+insert into studentTable values(3,3.4);
+insert into studentTable values(4,7.8);
+insert into studentTable values(5,9.5);
+insert into studentTable values(6,11);
 
-1 row created.
-
-SQL> insert into studenttable values(5,9.5);
-
-1 row created.
-
-
-SQL> @"C:\220962019\lab7\Q1.sql"
-Enter value for rollno: 2
-old   6: stu_rno:='&rollno';
-new   6: stu_rno:='2';
-input rollno in:2
-the gpa of the student is6.5
-
-PL/SQL procedure successfully completed.
-
-
-
+alter table studentTable 
+add  grade varchar2(2);
+=========================================================
+ Q1
+declare 
+gpa1 numeric(2,1);
+begin
+    select gpa into gpa1 from studentTable where roll=1; 
+    dbms_output.put_line('GPA:'||gpa1);
+end;
+========================================================================================
+ 
 Q2
-Enter value for rollno: 2
-old   6: stu_rno:='&rollno';
-new   6: stu_rno:='2';
-input the rollno:
-the gpa of the student in numeric is:6.5
-the gpa of the student in grade is:C
-
-
+declare
+score numeric(2,1);
+grade varchar(2);
+begin
+    select gpa into score from studentTable where roll=1; 
+    if score<=4 then
+        grade:='F';
+    elsif score<=5 then
+        grade:='E';
+    elsif score<=6 then
+        grade:='D';
+    elsif score<=7 then
+        grade:='C';
+    elsif score<=8 then
+        grade:='B';
+    elsif score<=9 then
+        grade:='A';
+    else
+        grade:='A+';
+    end if;
+    dbms_output.put_line('Grade is:'||grade);
+end;
+=====================================================
+ 
 Q3
- create table book1(ISSN numeric(4),title varchar(30),published numeric(4),issue_date date,return_date date);
+declare  
+issue date:='28-mar-2021';
+return date:='15-apr-2021';
+days number(5);
+begin 
+    days:=return-issue;
+    if days<=7 then
+        dbms_output.put_line('Fine:'||0);
+    elsif days<=15 then
+        dbms_output.put_line('Fine:'||(days-7));
+    elsif days<=30 then
+        dbms_output.put_line('Fine:'||(8+(days-15)*2));
+    else
+        dbms_output.put_line('Fine:'||(38+(days-30)*5));
+    end if;
+end;
+======================================================================================
+
+Q4.
+set serveroutput on;
+declare
+         r1  studenttable.rollno%type;
+         Gpa1 studenttable.gpa%type;
+
+Begin
+       r1 :=1;
+Loop
+Select gpa into gpa1 from studenttable where rollno=r1;
+   If(gpa1<=4) then 
+    Dbms_output.put_line(‘f’);
+   elsif(gpa1<=5) then 
+    Dbms_output.put_line(‘e’);
+   elsif(gpa1<=6) then 
+    Dbms_output.put_line(‘d’);
+
+    elsif(gpa1<=7) then 
+    Dbms_output.put_line(‘c’);
+    elsif(gpa1<=8) then 
+    Dbms_output.put_line(‘b’);
+     elsif(gpa1<=9) then 
+    Dbms_output.put_line(‘a’);
+    Else
+     Dbms_output.put_line(‘a+’);
+End if;
+    R1:=r1+1;
+if(r1>5) then 
+Exit ;
+End if;
+End loop;
+End;
+/
+
+========================================================================================
+Q5.Alter table studenttable add lettergrade varchar(1);
+set serveroutput on;
+declare
+         r1  studenttable.rollno%type;
+         Gpa1 studenttable.gpa%type;
+
+Begin
+       r1 :=1;
+While r1<=4
+Loop
+Begin
+Select gpa into gpa1 from studenttable where rollno=r1;
+   If(gpa1<=4) then 
+   Update studenttable set letter grade=‘E’;
+   elsif(gpa1<=5) then 
+    Update studenttable set lettergrade=‘D’;
+   elsif(gpa1<=6) then 
+    Update studenttable set lettergrade=‘c’;
+
+    elsif(gpa1<=7) then 
+    Update studenttable set lettergrade=‘b’;
+    elsif(gpa1<=8) then 
+    Update studenttable set lettergrade=‘a’;
+     elsif(gpa1<=9) then 
+    Update studenttable set lettergrade=‘A+’;
+    Else
+    Update studenttable set lettergrade=‘0’;
+
+     
+End if;
+    R1:=r1+1;
+End loop;
+End;
+/
 
 
-insert into book1 values(1234, 'Data Structures and Algorithms', 2015, '08-Feb-2023', '07-Mar-2023');
-insert into book1 values(2345, ' Computer Science', 2018, '15-Mar-2023', '21-Mar-2023');
-insert into book1 values(3456, 'Operating Systems', 2020, '01-Apr-2023', '6-Apr-2023');
-insert into book1 values(4567, 'Database Systems', 2017, '15-Mar-2023', '30-Mar-2023');
-insert into book1 values(5678, 'Principles of Software Engineering', 2019, '01-Mar-2023', '31-Mar-2023');
-insert into book1 values(6789, 'Web Development', 2021, '15-Jan-2023', '03-Feb-2023');
-insert into book1 values(7890, 'Introduction to Machine Learning', 2016, '01-May-2023', '31-May-2023');
-insert into book1 values(8901, 'Introduction to Artificial Intelligence', 2017, '15-Mar-2023', '14-Apr-2023');
-insert into book1 values(9012, 'Data Mining', 2018, '01-Feb-2023', '28-Feb-2023');
+============================================================================================
+
+Q6.
+Set serveroutput on;
+Declare
+ I numeric(1);
+ Maxg studenttable.gpa%type;
+ r1  studenttable.rollno%type;
+  G1 studenttable.gpa%type;
+
+Begin
+Maxg:=0;
+For I in 1..5 loop
+select gpa into g1 from studenttable where rollno=I;
+If g1>maxg then
+Maxg:=g1;
+End if;
+End loop;
+dbms_output.put_line(‘the max grade is’||maxg);
+End;
+/
+
+=============================================================================================
+
+Q7.set serveroutput on;
+declare
+         r1  studenttable.rollno%type;
+         Gpa1 studenttable.GPA%type;
+
+Begin
+       r1 :=1;
+<<hima>>
+Select gpa into gpa1 from studenttable WHERE ROLLNO=R1;
+   If(gpa1<=4) then 
+    Dbms_output.put_line('f');
+   elsif(gpa1<=5) then 
+    Dbms_output.put_line('e');
+   elsif(gpa1<=6) then 
+    Dbms_output.put_line('d');
+
+    elsif(gpa1<=7) then 
+    Dbms_output.put_line('c');
+    elsif(gpa1<=8) then 
+    Dbms_output.put_line('b');
+     elsif(gpa1<=9) then 
+    Dbms_output.put_line('a');
+    Else
+     Dbms_output.put_line('a+');
+End if;
+    R1:=r1+1;
+if(r1<5) then
+GOTO HIMA; 
+End if;
+End;
+/
+
+=======================================================================
+Q8.
+Set serveroutput on;
+Declare
+Mulname exception;
+noint exception;
+Temp numeric(2);
+Name1 instructor.name%type;
+Begin
+Name1:=‘&name1’;
+temp:=Select count(name) into temp from instructor where name=name1  ;
+If temp>1 then raise mulname;
+Elsif temp=0 then raise noint;
+Else dbms_output.put_line(‘there are no such instructors’);
+End if;
+Exception
+ When mulname then
+dbms_output.put_line(‘there are multiple names’);
+When noint then
+dbms_output.put_line(‘there are no instructor’);
+End;
+/
+
+
+=========================================================================================================
+
+
 
 
