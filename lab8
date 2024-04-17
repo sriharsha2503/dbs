@@ -1,86 +1,177 @@
+Lab 8
+Q1
 set serveroutput on
-drop table salary_raise;
-
-CREATE TABLE salary_raise(
-  Instructor_ID NUMBER(5),
-  Raise_date DATE,
-  Raise_amt NUMERIC(10,2)
-);
-
-DECLARE
-dname instructor.dept_name%TYPE := '&dept_name';
-  CURSOR raise_cursor IS
-    SELECT * FROM Instructor where dept_name=dname;
-    
-  raise_amt NUMERIC(8, 2);
-
-BEGIN
-
-    FOR i IN raise_cursor
-    LOOP
-		raise_amt := i.salary * 0.05;
-		INSERT INTO salary_raise VALUES (i.ID, CURRENT_DATE, raise_amt);
-    END LOOP;
-END;
-/
-
-SELECT * FROM salary_raise;
-
---Enter value for dept_name: Finance
---old   2: dname instructor.dept_name%TYPE := '&dept_name';
---new   2: dname instructor.dept_name%TYPE := 'Finance';
-
---PL/SQL procedure successfully completed.
-
-
---INSTRUCTOR_ID RAISE_DAT  RAISE_AMT
--- ------------- --------- ----------
---        12121 29-FEB-24       4500
---        76543 29-FEB-24       4000
-set serveroutput on
-DECLARE
-	CURSOR curs is select * from student order by tot_cred;
-	
-BEGIN
-	for s in curs
-        loop
-   	EXIT WHEN (curs%ROWCOUNT > 10) OR (curs%NOTFOUND);
-   	dbms_output.put_line(s.id || ' ' || s.name || ' ' || s.dept_name
-   	|| ' ' || s.tot_cred);
-   	END LOOP;
-END;
-/
-
---output:=
---70557 Snow Physics 0
---12345 Shankar Comp. Sci. 32
---55739 Sanchez Music 38
---45678 Levy Physics 46
---54321 Williams Comp. Sci. 54
---44553 Peltier Physics 56
---76543 Brown Comp. Sci. 58
---76653 Aoi Elec. Eng. 60
---19991 Brandt History 80
---98765 Bourikas Elec. Eng. 98
-
---PL/SQL procedure successfully completed.
-set serveroutput on 
 declare
-    cursor disp_curs is with stud as (select * from (student natural join takes natural join section)),ins as (select * from (instructor natural join teaches natural join section))
-                select course_id,title,ins.dept_name,credits,ins.name,ins.building,ins.room_number,ins.time_slot_id,count(*) as no_of_students from stud inner join  ins using(course_id,sec_id,semester,year) natural join course
-                group by (course_id,title,ins.dept_name,credits,ins.name,ins.building,ins.room_number,ins.time_slot_id);
+dname department.dept_name%TYPE;
+cursor c is (select * from instructor where dept_name=dname) for update;
 begin
-    for temp in disp_curs
-        loop
-            dbms_output.put_line('Course ID : '|| temp.course_id);
-            dbms_output.put_line('Title : '|| temp.title);
-            dbms_output.put_line('Department : '|| temp.dept_name);
-            dbms_output.put_line('Credits : '|| temp.credits);
-            dbms_output.put_line('Instructor Name : '|| temp.name);
-            dbms_output.put_line('Building : '|| temp.building);
-            dbms_output.put_line('Room Number : '|| temp.room_number);
-            dbms_output.put_line('Time Slot ID : '|| temp.time_slot_id);
-            dbms_output.put_line('Total Students : '|| temp.no_of_students);
-        end loop;
+	dname :='&Department_Name';
+	for i in c loop
+		insert into salary_raise values(i.ID,current_date,(i.salary*1.05)-i.salary);
+		update instructor
+		set salary=salary*1.05
+		where current of c;
+		dbms_output.put_line(c%ROWCOUNT || ' rows updated');
+	end loop;
 end;
 /
+{or}
+Q1
+Set serveroutput on;
+Declare 
+Cursor c(dname instructor.dept_name%type) is select
+From instructor where dept_name=dname;
+Inst instructor%rowtype;
+Begin
+str=‘&deptname’;
+Open c(str);
+Loop
+Fetch c into inst;
+Exit when c%notfound;
+Update instructor set salary=salary*1.05 where dept_name=str;
+Insert into raise_salary values(inst.id,SYSDATE,inst.salary*1.05);
+End loop;
+Close c;
+End;
+/
+
+
+Q2
+Set serveroutput on;
+Declare
+Stu student%rowtype;
+Cursor c is select * from student orderly tot_credits;
+Begin
+Open c;
+Loop
+Exit when (c%rowcount>9) or c%notfound;
+Fetch c int stu;
+Dbms_output.put_line(stu.id||’ ‘||stu.dept_name||’ ‘||stu.name);
+End loop;
+Close c;
+End;
+/
+
+Q3
+set serveroutput on
+declare                                                 
+cursor c is (select course_id,title,dept_name,credits,name,building,room_number,time_slot_id,count from(select course_id,title,dept_name,credits,name,sec_id,semester,year,count from (select ID,name,course_id,sec_id,semester,year,count from (select course_id,sec_id,semester,year,tt.ID,count(distinct t.ID) count from takes t join teaches tt using(course_id,sec_id,semester,year) group by course_id,sec_id,semester,year,tt.ID) join instructor using(ID)) join course using(course_id)) join section using(course_id,sec_id,semester,year));
+begin
+	for i in c loop
+		dbms_output.put_line('-----------------------------------------------------------------------------');
+		dbms_output.put_line(i.course_id||'|'||i.title||'|'||i.dept_name||'|'||i.credits||'|'||i.name||'|'||i.building||'|'||i.room_number||'|'||i.time_slot_id||'|'||i.count);
+		dbms_output.put_line('-----------------------------------------------------------------------------');
+	end loop;
+end;
+/
+
+Q4
+Set serveroutput on;
+Declare
+Cursor c is select * from student natural join takeswhere dept_name=‘cs101’ and tot_credits<30;
+Begin
+For I in c
+Loop
+Delete from takes where takes.id=I.id and takes.course_id=‘cs101’;
+End loop;
+End;
+/
+
+
+Q5
+Set serveroutput on;
+Declare
+Cursor c1 is select *  from studenttable for update;
+Begin
+For stud in c1
+	if stud.gpa<4 then 
+Update stduenttable set lettergrade=‘f’ where current of c1
+elsif stud.gpa between 4 and 5 then
+        update student1 set LetterGrade='E' where current of c1;
+    elsif stud.gpa between 5 and 6 then
+        update student1 set LetterGrade='D' where current of c1;
+    elsif stud.gpa between 6 and 7 then
+        update student1 set LetterGrade='C' where current of c1;
+    elsif stud.gpa between 7 and 8 then
+        update student1 set LetterGrade='B' where current of c1;
+    elsif stud.gpa between 8 and 9 then
+        update student1 set LetterGrade='A' where current of c1;
+    else
+        update student1 set LetterGrade='A+' where current of c1;
+    end if;
+End loop;
+End;
+/
+
+Q6
+Set serveroutput on;
+Declare 
+Cursor c1(c_id teaches.course_id%type) is select name from instructor natural join teaches where teaches.course_id=c_id;
+Begin
+name:=‘&name’;
+For I in c1
+	loop
+	dbms_output.put_line(“name:”|| I.name);
+End loop;
+End;
+/
+
+Q7
+Set serveroutput on;
+Declare
+Cursor c1 is select * from advisor ;
+Cursor c2(I takes.id%type) is select * from takes where takes.id=i;
+Cursor c3(I teaches.id%type) is select * from teaches where teaches.id=i;
+Begin 
+For i in c1
+	loop
+	flag:=0;
+For j in c2(I.s_id)
+	loop
+For z in c3(I.i_id)
+	loop
+	if j.course_id = z.course_id and j.sec_id = z.sec_id and j.semester = z.semester and j.year = z.year then
+Select student_name from student where student_name=j.id;
+dbms_output.put_line('ID: ' || j.id || 'Name: ' || stdName);
+                flag := 1;
+                end if;
+            end loop;
+            if flag = 1 then exit; 
+            end if;
+        end loop;
+    end loop;
+end;
+/
+(Or)
+Q7
+set serveroutput on
+declare
+cursor c is (select distinct name from (select t.id from takes t,advisor a,teaches tt where a.s_id=t.id and a.i_id=tt.id) join student using (id));
+begin
+	for i in c loop
+		dbms_output.put_line(i.name);
+	end loop;
+end;
+/
+
+
+Q8
+Set serveroutput on;
+declare
+assigned_money department.budget%TYPE;
+budget department.budget%TYPE;
+begin
+    Savepoint no_raise;
+    update instructor set salary = 1.2*salary where dept_name='Biology';
+    select sum(salary) into assigned_money from instructor where dept_name='Biology';
+    select budget into budget from department where dept_name='Biology';
+    if(assigned_money > budget) then
+        Rollback to Savepoint no_raise;
+    end if;
+    commit;
+end;
+/ 
+	
+
+
+
