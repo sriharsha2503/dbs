@@ -214,7 +214,7 @@ insert into QUESTION_IS_OF values('DBS0022', 'ICT3171');
      RETURN v_total_marks;
    END;
    /
-added=====================
+--added=====================
 DECLARE
   v_total_marks NUMBER;
 BEGIN
