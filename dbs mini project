@@ -207,7 +207,8 @@ insert into QUESTION_IS_OF values('DBS0022', 'ICT3171');
 
 1.⁠ ⁠*Function to Calculate Total Quiz Marks*
    ⁠ plsql
-   CREATE OR REPLACE FUNCTION getTotalMarks(quiz_id IN VARCHAR2) RETURN NUMBER IS
+set serveroutput on;
+   CREATE OR REPLACE FUNCTION getTotalMarks(quiz_id IN VARCHAR2) RETURN NUMBER AS
      v_total_marks NUMBER;
    BEGIN
      SELECT SUM(max_marks) INTO v_total_marks FROM QUIZ WHERE id = quiz_id;
@@ -260,6 +261,7 @@ BEGIN
    COMMIT;
 END;
 /
+
 =======================================================================================
  3.⁠ ⁠*Cursor to List Questions in a Quiz*
    ⁠ plsql
@@ -278,6 +280,7 @@ END;
      CLOSE c_questions;
    END;
    (or)==================
+set serveroutput on;
 CREATE OR REPLACE PROCEDURE listQuestions IS
   v_quiz_id QUESTION_IS_OF.id%TYPE;
   CURSOR c_questions IS
@@ -312,6 +315,7 @@ END;
    END;
    /
 =================(OR)
+set serveroutput on;
 CREATE OR REPLACE PROCEDURE updateStudentPassword IS
   v_reg_no STUDENT.reg_no%TYPE;
   v_new_password VARCHAR2(50);
