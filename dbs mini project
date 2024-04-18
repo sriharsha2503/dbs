@@ -426,10 +426,10 @@ CREATE OR REPLACE PACKAGE student_pkg AS
   PROCEDURE updateStudentPassword(p_reg_no IN VARCHAR2);
 
   -- Procedure to filter quizzes by maximum marks
-  PROCEDURE filterQuizzesByMarks;
+  PROCEDURE filterQuizzesByMarks(p_max_marks IN NUMBER);
 
   -- Procedure to list questions in a quiz
-  PROCEDURE listQuestions;
+  PROCEDURE listQuestions(p_quiz_id IN VARCHAR2);
 
   -- Function to get total marks for a quiz
   FUNCTION getTotalMarks(quiz_id IN VARCHAR2) RETURN NUMBER;
@@ -450,15 +450,11 @@ CREATE OR REPLACE PACKAGE BODY student_pkg AS
   END;
 
   -- Procedure to filter quizzes by maximum marks
-  PROCEDURE filterQuizzesByMarks IS
-    v_max_marks NUMBER;
+  PROCEDURE filterQuizzesByMarks(p_max_marks IN NUMBER) IS
     CURSOR c_quizzes IS
-      SELECT id FROM QUIZ WHERE max_marks <= v_max_marks;
+      SELECT id FROM QUIZ WHERE max_marks <= p_max_marks;
     v_quiz_id QUIZ.id%TYPE;
   BEGIN
-    -- Prompt the user for input
-    v_max_marks := &p_max_marks;
-
     -- Open the cursor and fetch quizzes
     OPEN c_quizzes;
     LOOP
@@ -470,16 +466,12 @@ CREATE OR REPLACE PACKAGE BODY student_pkg AS
   END;
 
   -- Procedure to list questions in a quiz
-  PROCEDURE listQuestions IS
-    v_quiz_id QUESTION_IS_OF.id%TYPE;
+  PROCEDURE listQuestions(p_quiz_id IN VARCHAR2) IS
     CURSOR c_questions IS
       SELECT prompt FROM QUESTION
-      WHERE id IN (SELECT id FROM QUIZ_IS_OF WHERE sub_code = v_quiz_id);
+      WHERE id IN (SELECT id FROM QUIZ_IS_OF WHERE sub_code = p_quiz_id);
     v_question QUESTION.prompt%TYPE;
   BEGIN
-    -- Prompt the user for input
-    v_quiz_id := '&quiz_id';
-
     -- Open the cursor and fetch questions
     OPEN c_questions;
     LOOP
@@ -508,15 +500,27 @@ BEGIN
 END;
 
 -- Call the filterQuizzesByMarks procedure
+DECLARE
+  v_max_marks NUMBER;
 BEGIN
+  -- Prompt the user for input
+  v_max_marks := &p_max_marks;
+  
+  -- Call the procedure
   DBMS_OUTPUT.PUT_LINE('Enter the maximum marks for filtering quizzes:');
-  student_pkg.filterQuizzesByMarks;
+  student_pkg.filterQuizzesByMarks(v_max_marks);
 END;
 
 -- Call the listQuestions procedure
+DECLARE
+  v_quiz_id VARCHAR2(20);
 BEGIN
+  -- Prompt the user for input
+  v_quiz_id := '&quiz_id';
+  
+  -- Call the procedure
   DBMS_OUTPUT.PUT_LINE('Enter the quiz ID to list questions:');
-  student_pkg.listQuestions;
+  student_pkg.listQuestions(v_quiz_id);
 END;
 
 -- Call the getTotalMarks function
@@ -524,9 +528,11 @@ DECLARE
   v_quiz_id VARCHAR2(20) := '&quiz_id';
   v_total_marks NUMBER;
 BEGIN
+  -- Call the function
   v_total_marks := student_pkg.getTotalMarks(v_quiz_id);
   DBMS_OUTPUT.PUT_LINE('Total marks for quiz ' || v_quiz_id || ': ' || v_total_marks);
 END;
+
 ==========================================================================
 
 8.*trigger*
