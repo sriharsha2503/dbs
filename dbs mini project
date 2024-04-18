@@ -222,7 +222,7 @@ BEGIN
   v_total_marks := getTotalMarks('&quiz_id');
 
   -- Output the result
-  DBMS_OUTPUT.PUT_LINE('Total Marks for Quiz ID &quiz_id: ' || v_total_marks);
+  DBMS_OUTPUT.PUT_LINE('Total Marks for Quiz ID quiz_id: ' || v_total_marks);
 END;
 /
 ==============================================================================
