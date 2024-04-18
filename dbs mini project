@@ -295,16 +295,14 @@ END;
    (or)==================
 SET SERVEROUTPUT ON;
 
-CREATE OR REPLACE PROCEDURE listQuestions IS
-  v_quiz_id QUESTION_IS_OF.id%TYPE;
+CREATE OR REPLACE PROCEDURE listQuestions(
+  p_quiz_id IN QUESTION_IS_OF.id%TYPE
+) IS
   CURSOR c_questions IS
     SELECT prompt FROM QUESTION
-    WHERE id IN (SELECT id FROM QUIZ_IS_OF WHERE sub_code = v_quiz_id);
+    WHERE id IN (SELECT id FROM QUIZ_IS_OF WHERE sub_code = p_quiz_id);
   v_question QUESTION.prompt%TYPE;
 BEGIN
-  -- Prompt the user for input
-  v_quiz_id := '&quiz_id';
-
   -- Open the cursor and fetch questions
   OPEN c_questions;
   LOOP
