@@ -340,23 +340,33 @@ END;
    END;
    /
 =================(OR)
-set serveroutput on;
-CREATE OR REPLACE PROCEDURE updateStudentPassword IS
+SET SERVEROUTPUT ON;
+
+CREATE OR REPLACE PROCEDURE updateStudentPassword(
+  p_reg_no IN STUDENT.reg_no%TYPE,
+  p_new_password IN VARCHAR2
+) IS
+BEGIN
+  -- Update the student password
+  UPDATE STUDENT SET pwd = p_new_password WHERE reg_no = p_reg_no;
+  COMMIT;
+END;
+/
+
+DECLARE
+  -- Declare variables to store user input
   v_reg_no STUDENT.reg_no%TYPE;
   v_new_password VARCHAR2(50);
 BEGIN
   -- Prompt the user for input
   v_reg_no := '&p_reg_no';
+  v_new_password := '&p_new_password';
 
-  -- Assuming user input is gathered through some external mechanism, like an application
-  DBMS_OUTPUT.PUT_LINE('Enter new password:');
-  EXECUTE IMMEDIATE 'ACCEPT v_new_password CHAR(50)';
-
-  -- Update the student password
-  UPDATE STUDENT SET pwd = v_new_password WHERE reg_no = v_reg_no;
-  COMMIT;
+  -- Call the updateStudentPassword procedure with user input
+  updateStudentPassword(v_reg_no, v_new_password);
 END;
 /
+
 =================================================================================================== 
   
 5.⁠ ⁠*Cursor with User Input to Filter and List Quizzes by Maximum Marks*
