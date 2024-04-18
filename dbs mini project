@@ -293,7 +293,8 @@ END;
      CLOSE c_questions;
    END;
    (or)==================
-set serveroutput on;
+SET SERVEROUTPUT ON;
+
 CREATE OR REPLACE PROCEDURE listQuestions IS
   v_quiz_id QUESTION_IS_OF.id%TYPE;
   CURSOR c_questions IS
@@ -314,6 +315,19 @@ BEGIN
   CLOSE c_questions;
 END;
 /
+
+DECLARE
+  -- Declare variables to store user input
+  v_quiz_id QUESTION_IS_OF.id%TYPE;
+BEGIN
+  -- Prompt the user for input
+  v_quiz_id := '&quiz_id';
+
+  -- Call the listQuestions procedure with user input
+  listQuestions(v_quiz_id);
+END;
+/
+
 ==============================================================================================
  4.⁠ ⁠*Procedure to Update Student Password with User Input*
    ⁠ plsql
