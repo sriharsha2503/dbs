@@ -1,0 +1,503 @@
+--create table commands
+  -- Drop tables if they exist in reverse order due to foreign key constraints
+DROP TABLE IF EXISTS QUIZ_IS_OF;
+DROP TABLE IF EXISTS QUESTION_IS_OF;
+DROP TABLE IF EXISTS TAKES;
+DROP TABLE IF EXISTS QUESTION;
+DROP TABLE IF EXISTS QUIZ;
+DROP TABLE IF EXISTS SUBJECT;
+DROP TABLE IF EXISTS FACULTY;
+DROP TABLE IF EXISTS ADMIN;
+DROP TABLE IF EXISTS STUDENT;
+
+-- Creation of independent tables
+CREATE TABLE STUDENT(
+    reg_no varchar(9) primary key,
+    name varchar(50),
+    dept varchar(3),
+    section varchar(1),
+    pwd varchar(50)
+);
+
+CREATE TABLE ADMIN(
+    id varchar(20) primary key,
+    pwd varchar(50)
+);
+
+CREATE TABLE FACULTY(
+    id varchar(20) primary key,
+    name varchar(50),
+    dept varchar(3),
+    pwd varchar(50)
+);
+
+CREATE TABLE SUBJECT(
+    sub_code varchar(7) primary key,
+    name varchar(50),
+    sem int,
+    credits int
+);
+
+CREATE TABLE QUIZ(
+    id varchar(20),
+    max_marks int,
+    duration float,
+    primary key(id)
+);
+
+CREATE TABLE QUESTION(
+    id varchar(20),
+    prompt varchar(80),
+    choice_a varchar(30),
+    choice_b varchar(30),
+    choice_c varchar(30),
+    choice_d varchar(30),
+    correct_ans varchar(1),
+    primary key(id)
+);
+
+-- Creation of tables with dependencies
+CREATE TABLE TAKES(
+    reg_no varchar(9),
+    id varchar(20),
+    deadline date,
+    primary key(reg_no, id),
+    foreign key(reg_no) references STUDENT,
+    foreign key(id) references QUIZ
+);
+
+CREATE TABLE QUESTION_IS_OF(
+    id varchar(20),
+    sub_code varchar(7),
+    primary key(id, sub_code),
+    foreign key(id) references QUESTION,
+    foreign key(sub_code) references SUBJECT
+);
+
+CREATE TABLE QUIZ_IS_OF(
+    id varchar(20),
+    sub_code varchar(7),
+    primary key(id, sub_code),
+    foreign key(id) references QUIZ,
+    foreign key(sub_code) references SUBJECT
+);
+
+
+
+
+
+=============================================================================================================
+
+
+
+--insertion into TABLE COMMANDS
+insert into STUDENT values('200911076','Aditya Choubey','ICT','B','aditya-c');
+insert into STUDENT values('200911026','Palak Dhawal','ICT','B','palak-d');
+insert into STUDENT values('200911072','Praneeth Chand','ICT','B','praneeth-c');
+insert into STUDENT values('200968009','Sai Anish Malla','DSE','B','anish-m');
+insert into STUDENT values('200907096','Tushar Upadhyay','ECE','C','tushar-u');
+(200907098, Y Vishal Rao, ECE, C, yvishal-r)
+
+insert into FACULTY values('11076', 'Girija Attigeri', 'ICT', 'girja-a');
+insert into FACULTY values('11078', 'Jayashree', 'ICT', 'jayashree');
+insert into FACULTY values('68001', 'Vidya Rao', 'DSE', 'vidya-r');
+insert into FACULTY values('07031', 'Yellur Vishal Rao', 'ECE', 'yvr');
+
+insert into SUBJECT values('ICT3171', 'Database Systems', 5, 3);
+insert into SUBJECT values('ICT3156', 'Cybersecurity', 5, 3);
+insert into SUBJECT values('ICT2171', 'Data Structures', 3, 4);
+insert into SUBJECT values('ICT2156', 'Digital System Design', 3, 3);
+insert into SUBJECT values('ECE3171', 'Analog/Digital Communications', 5, 4);
+insert into SUBJECT values('ECE3156', 'Linear Control Theory', 5, 3);
+insert into SUBJECT values('ECE2171', 'Computer Organization and Architecture', 3, 3);
+insert into SUBJECT values('ECE2156', 'Digital System Design', 3, 3);
+insert into SUBJECT values('DSE3171', 'Cloud Computing', 5, 3);
+insert into SUBJECT values('DSE3156', 'Natural Language Process', 5, 3);
+insert into SUBJECT values('DSE2171', 'Finance and Econometrics', 3, 4);
+insert into SUBJECT values('DSE2156', 'Object Oriented Programming', 3, 3);
+
+insert into QUIZ values('DBS001', 10, 30);
+insert into QUIZ values('DBS002', 5, 30);
+insert into QUIZ values('DBS003', 5, 30);
+insert into QUIZ values('CYS001', 5, 30);
+insert into QUIZ values('CYS002', 5, 30);
+insert into QUIZ values('CYS003', 5, 30);
+insert into QUIZ values('CYS004', 5, 30);
+insert into QUIZ values('DSA001', 10, 30);
+insert into QUIZ values('DSA002', 10, 30);
+insert into QUIZ values('ADC001', 5, 30);
+insert into QUIZ values('ADC002', 5, 30);
+insert into QUIZ values('ADC003', 5, 30);
+insert into QUIZ values('ADC004', 5, 30);
+insert into QUIZ values('NLP001', 10, 30);
+insert into QUIZ values('NLP002', 10, 30);
+
+insert into QUIZ_IS_OF values('DBS001', 'ICT3171');
+insert into QUIZ_IS_OF values('DBS002', 'ICT3171');
+insert into QUIZ_IS_OF values('DBS003', 'ICT3171');
+insert into QUIZ_IS_OF values('CYS001', 'ICT3156');
+insert into QUIZ_IS_OF values('CYS002', 'ICT3156');
+insert into QUIZ_IS_OF values('CYS003', 'ICT3156');
+insert into QUIZ_IS_OF values('CYS004', 'ICT3156');
+insert into QUIZ_IS_OF values('DSA001', 'ICT2171');
+insert into QUIZ_IS_OF values('DSA002', 'ICT2171');
+insert into QUIZ_IS_OF values('ADC001', 'ECE3171');
+insert into QUIZ_IS_OF values('ADC002', 'ECE3171');
+insert into QUIZ_IS_OF values('ADC003', 'ECE3171');
+insert into QUIZ_IS_OF values('ADC004', 'ECE3171');
+insert into QUIZ_IS_OF values('NLP001', 'DSE3156');
+insert into QUIZ_IS_OF values('NLP002', 'DSE3156');
+
+insert into TAKES values('200911076', 'DBS001', '27-Oct-2022');
+insert into TAKES values('200911076', 'DBS002', '27-Oct-2022');
+insert into TAKES values('200911076', 'CYS001', '27-Oct-2022');
+insert into TAKES values('200911076', 'CYS002', '27-Oct-2022');
+insert into TAKES values('200911076', 'CYS003', '27-Oct-2022');
+insert into TAKES values('200911076', 'CYS004', '27-Oct-2022');
+insert into TAKES values('200911072', 'DBS001', '27-Oct-2022');
+insert into TAKES values('200911072', 'DBS002', '27-Oct-2022');
+insert into TAKES values('200911072', 'CYS001', '27-Oct-2022');
+insert into TAKES values('200911072', 'CYS002', '27-Oct-2022');
+insert into TAKES values('200911072', 'CYS003', '27-Oct-2022');
+insert into TAKES values('200911072', 'CYS004', '27-Oct-2022');
+insert into TAKES values('200911026', 'DBS001', '27-Oct-2022');
+insert into TAKES values('200911026', 'DBS002', '27-Oct-2022');
+insert into TAKES values('200911026', 'CYS001', '27-Oct-2022');
+insert into TAKES values('200911026', 'CYS002', '27-Oct-2022');
+insert into TAKES values('200911026', 'CYS003', '27-Oct-2022');
+insert into TAKES values('200911026', 'CYS004', '27-Oct-2022');
+insert into TAKES values('200968009', 'NLP001', '27-Oct-2022');
+insert into TAKES values('200968009', 'NLP002', '27-Oct-2022');
+insert into TAKES values('200907096', 'ADC001', '27-Oct-2022');
+insert into TAKES values('200907096', 'ADC002', '27-Oct-2022');
+insert into TAKES values('200907096', 'ADC003', '27-Oct-2022');
+insert into TAKES values('200907096', 'ADC004', '27-Oct-2022');
+
+insert into QUESTION values('DBS0011', 'DBS Q 1', 'A', 'B', 'C', 'D', 'A');
+insert into QUESTION values('DBS0012', 'DBS Q 2', 'A', 'B', 'C', 'D', 'B');
+insert into QUESTION values('DBS0013', 'DBS Q 3', 'A', 'B', 'C', 'D', 'C');
+insert into QUESTION values('DBS0014', 'DBS Q 4', 'A', 'B', 'C', 'D', 'D');
+insert into QUESTION values('DBS0015', 'DBS Q 5', 'A', 'B', 'C', 'D', 'B');
+insert into QUESTION values('DBS0016', 'DBS Q 6', 'A', 'B', 'C', 'D', 'C');
+insert into QUESTION values('DBS0017', 'DBS Q 7', 'A', 'B', 'C', 'D', 'A');
+insert into QUESTION values('DBS0018', 'DBS Q 8', 'A', 'B', 'C', 'D', 'D');
+insert into QUESTION values('DBS0019', 'DBS Q 9', 'A', 'B', 'C', 'D', 'C');
+insert into QUESTION values('DBS0021', 'DBS Q 10', 'A', 'B', 'C', 'D', 'B');
+insert into QUESTION values('DBS0022', 'DBS Q 11', 'A', 'B', 'C', 'D', 'A');
+
+insert into QUESTION_IS_OF values('DBS0011', 'ICT3171');
+insert into QUESTION_IS_OF values('DBS0012', 'ICT3171');
+insert into QUESTION_IS_OF values('DBS0013', 'ICT3171');
+insert into QUESTION_IS_OF values('DBS0014', 'ICT3171');
+insert into QUESTION_IS_OF values('DBS0015', 'ICT3171');
+insert into QUESTION_IS_OF values('DBS0016', 'ICT3171');
+insert into QUESTION_IS_OF values('DBS0017', 'ICT3171');
+insert into QUESTION_IS_OF values('DBS0018', 'ICT3171');
+insert into QUESTION_IS_OF values('DBS0019', 'ICT3171');
+insert into QUESTION_IS_OF values('DBS0021', 'ICT3171');
+insert into QUESTION_IS_OF values('DBS0022', 'ICT3171');
+
+
+
+=====================================================================================================
+
+
+--PLSQL QURIES
+
+
+--1. Procedure to Add New Quiz
+
+CREATE OR REPLACE PROCEDURE AddQuiz (
+    p_quiz_name IN VARCHAR2,
+    p_quiz_date IN DATE
+) AS
+BEGIN
+    INSERT INTO quiz(quiz_name, quiz_date) VALUES (p_quiz_name, p_quiz_date);
+    COMMIT;
+END;
+/
+
+
+--2. Function to Count Questions in a Quiz
+
+CREATE OR REPLACE FUNCTION CountQuestions(p_quiz_id NUMBER) RETURN NUMBER IS
+    l_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO l_count FROM question WHERE quiz_id = p_quiz_id;
+    RETURN l_count;
+END;
+/
+
+
+--3. Cursor to List All Quizzes
+
+DECLARE
+    CURSOR c_quizzes IS SELECT quiz_id, quiz_name FROM quiz;
+    v_quiz quiz%ROWTYPE;
+BEGIN
+    OPEN c_quizzes;
+    LOOP
+        FETCH c_quizzes INTO v_quiz;
+        EXIT WHEN c_quizzes%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Quiz ID: ' || v_quiz.quiz_id || ', Quiz Name: ' || v_quiz.quiz_name);
+    END LOOP;
+    CLOSE c_quizzes;
+END;
+/
+
+
+-- 4. Trigger to Update Question Count on New Question
+
+CREATE OR REPLACE TRIGGER UpdateQuestionCount
+AFTER INSERT ON question
+FOR EACH ROW
+BEGIN
+    UPDATE quiz SET question_count = question_count + 1
+    WHERE quiz_id = :NEW.quiz_id;
+END;
+/
+
+
+--5. Procedure to Delete a Quiz
+
+CREATE OR REPLACE PROCEDURE DeleteQuiz (p_quiz_id NUMBER) AS
+BEGIN
+    DELETE FROM question WHERE quiz_id = p_quiz_id;
+    DELETE FROM quiz WHERE quiz_id = p_quiz_id;
+    COMMIT;
+END;
+/
+
+
+-- 6. Function to Check if a Quiz is Complete
+
+CREATE OR REPLACE FUNCTION IsQuizComplete(p_quiz_id NUMBER) RETURN VARCHAR2 IS
+    l_question_count NUMBER;
+    l_complete_status VARCHAR2(10);
+BEGIN
+    SELECT COUNT(*) INTO l_question_count FROM question WHERE quiz_id = p_quiz_id;
+    IF l_question_count >= 10 THEN
+        l_complete_status := 'Complete';
+    ELSE
+        l_complete_status := 'Incomplete';
+    END IF;
+    RETURN l_complete_status;
+END;
+/
+
+--7. Function to Get the Latest Quiz
+--This function retrieves the most recently created quiz, assuming there is a `created_at` timestamp column in the `quiz` table.
+
+
+CREATE OR REPLACE FUNCTION GetLatestQuiz RETURN VARCHAR2 IS
+    l_quiz_name VARCHAR2(100);
+BEGIN
+    SELECT quiz_name INTO l_quiz_name FROM quiz
+    ORDER BY created_at DESC
+    FETCH FIRST 1 ROW ONLY;
+    RETURN l_quiz_name;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'No quizzes found.';
+END;
+/
+
+
+--8. Procedure to Add a Participant to a Quiz
+--This procedure adds a participant to a quiz. It assumes the existence of a `participants` table with a foreign key to `quiz`.
+
+
+CREATE OR REPLACE PROCEDURE AddParticipant (
+    p_participant_name VARCHAR2,
+    p_quiz_id NUMBER
+) AS
+BEGIN
+    INSERT INTO participants(participant_name, quiz_id) VALUES (p_participant_name, p_quiz_id);
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END;
+/
+
+
+--9. Trigger to Log Quiz Creation
+--This trigger logs every new quiz created into a `quiz_log` table, which must include `quiz_id`, `quiz_name`, and `log_date`.
+
+CREATE OR REPLACE TRIGGER LogNewQuiz
+AFTER INSERT ON quiz
+FOR EACH ROW
+BEGIN
+    INSERT INTO quiz_log(quiz_id, quiz_name, log_date)
+    VALUES (:NEW.quiz_id, :NEW.quiz_name, SYSDATE);
+END;
+/
+
+
+--10. Procedure to Update Quiz Date
+--This procedure updates the quiz date, which can be useful if the date needs to be rescheduled.
+
+
+CREATE OR REPLACE PROCEDURE UpdateQuizDate (
+    p_quiz_id NUMBER,
+    p_new_date DATE
+) AS
+BEGIN
+    UPDATE quiz
+    SET quiz_date = p_new_date
+    WHERE quiz_id = p_quiz_id;
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END;
+/
+
+
+--11. Cursor to List Participants for a Quiz
+--This program uses a cursor to fetch and display all participants registered for a particular quiz.
+
+
+DECLARE
+    CURSOR c_participants(p_quiz_id NUMBER) IS
+        SELECT participant_name FROM participants WHERE quiz_id = p_quiz_id;
+    v_participant participants%ROWTYPE;
+BEGIN
+    OPEN c_participants(101); -- example quiz_id
+    LOOP
+        FETCH c_participants INTO v_participant;
+        EXIT WHEN c_participants%NOTFOUND;
+        DBMS_OUTPUT.PUT_LINE('Participant Name: ' || v_participant.participant_name);
+    END LOOP;
+    CLOSE c_participants;
+END;
+/
+
+
+-- 12. Function to Count Participants in a Quiz
+--This function returns the number of participants in a given quiz, useful for statistics or limits.
+
+
+CREATE OR REPLACE FUNCTION CountParticipants(p_quiz_id NUMBER) RETURN NUMBER IS
+    l_count NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO l_count FROM participants WHERE quiz_id = p_quiz_id;
+    RETURN l_count;
+END;
+/
+
+
+=============================================================================================================================================
+
+
+--SQL QURIES
+Here are 15 SQL queries that utilize various SQL concepts relevant to a quiz database like the one you might have on your GitHub repository. These queries are designed to perform a range of operations from simple data retrieval to more complex joins, aggregations, and subqueries.
+
+### 1. Retrieve All Quizzes
+```sql
+SELECT * FROM quiz;
+```
+
+### 2. Find a Specific Quiz by ID
+```sql
+SELECT quiz_name, quiz_date FROM quiz WHERE quiz_id = 101;
+```
+
+### 3. List All Questions for a Given Quiz
+```sql
+SELECT question_text FROM question WHERE quiz_id = 101;
+```
+
+### 4. Count Number of Questions in Each Quiz
+```sql
+SELECT quiz_id, COUNT(*) AS num_questions FROM question GROUP BY quiz_id;
+```
+
+### 5. Find Quizzes with More Than 10 Questions
+```sql
+SELECT q.quiz_id, q.quiz_name
+FROM quiz q JOIN question qt ON q.quiz_id = qt.quiz_id
+GROUP BY q.quiz_id, q.quiz_name
+HAVING COUNT(qt.question_id) > 10;
+```
+
+### 6. List Participants Who Attended a Specific Quiz
+```sql
+SELECT p.participant_name FROM participants p
+JOIN quiz_participation qp ON p.participant_id = qp.participant_id
+WHERE qp.quiz_id = 101;
+```
+
+### 7. Retrieve Quiz Results for a Given Participant
+```sql
+SELECT q.quiz_name, qp.score
+FROM quiz_participation qp
+JOIN quiz q ON qp.quiz_id = q.quiz_id
+WHERE qp.participant_id = 1;
+```
+
+### 8. Update Score for a Participant in a Quiz
+```sql
+UPDATE quiz_participation
+SET score = 85
+WHERE participant_id = 1 AND quiz_id = 101;
+```
+
+### 9. Delete a Quiz That Has No Participants
+```sql
+DELETE FROM quiz
+WHERE quiz_id NOT IN (SELECT quiz_id FROM quiz_participation);
+```
+
+### 10. Insert a New Quiz
+```sql
+INSERT INTO quiz(quiz_name, quiz_date) VALUES ('SQL Mastery', '2024-06-30');
+```
+
+### 11. Show Top 5 Highest Scoring Participants Across All Quizzes
+```sql
+SELECT participant_id, AVG(score) AS avg_score
+FROM quiz_participation
+GROUP BY participant_id
+ORDER BY avg_score DESC
+FETCH FIRST 5 ROWS ONLY;
+```
+
+### 12. List Quizzes and Their Participant Counts
+```sql
+SELECT q.quiz_name, COUNT(qp.participant_id) AS participant_count
+FROM quiz q
+LEFT JOIN quiz_participation qp ON q.quiz_id = qp.quiz_id
+GROUP BY q.quiz_name;
+```
+
+### 13. Increase Score by 10% for All Participants in a Specific Quiz
+```sql
+UPDATE quiz_participation
+SET score = score * 1.1
+WHERE quiz_id = 101;
+```
+
+### 14. Retrieve All Quizzes Scheduled for a Future Date
+```sql
+SELECT quiz_name FROM quiz
+WHERE quiz_date > CURRENT_DATE;
+```
+
+--15. Find Participants Who Have Attended All Quizzes
+
+SELECT participant_name
+FROM participants p
+WHERE NOT EXISTS (
+    SELECT quiz_id FROM quiz
+    WHERE NOT EXISTS (
+        SELECT 1 FROM quiz_participation qp
+        WHERE qp.quiz_id = quiz.quiz_id AND qp.participant_id = p.participant_id
+    )
+);
+
+
+
+
