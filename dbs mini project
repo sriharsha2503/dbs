@@ -243,24 +243,37 @@ END;
    /
 ===================
 (OR)
-CREATE OR REPLACE PROCEDURE addQuiz IS
-   v_id QUIZ.id%TYPE;
-   v_max_marks QUIZ.max_marks%TYPE;
-   v_duration QUIZ.duration%TYPE;
+set serveroutput on;
+CREATE OR REPLACE PROCEDURE addQuiz(
+  p_id IN VARCHAR2,
+  p_max_marks IN NUMBER,
+  p_duration IN NUMBER
+) IS
 BEGIN
-   -- Prompt the user for input
-   v_id := '&p_id';
-   v_max_marks := &p_max_marks;
-   v_duration := &p_duration;
+  -- Insert the values into the QUIZ table
+  INSERT INTO QUIZ(id, max_marks, duration)
+  VALUES (p_id, p_max_marks, p_duration);
 
-   -- Insert the values into the QUIZ table
-   INSERT INTO QUIZ(id, max_marks, duration)
-   VALUES (v_id, v_max_marks, v_duration);
-
-   -- Commit the transaction
-   COMMIT;
+  -- Commit the transaction
+  COMMIT;
 END;
 /
+
+DECLARE
+  v_id QUIZ.id%TYPE;
+  v_max_marks QUIZ.max_marks%TYPE;
+  v_duration QUIZ.duration%TYPE;
+BEGIN
+  -- Prompt the user for input
+  v_id := '&p_id';
+  v_max_marks := &p_max_marks;
+  v_duration := &p_duration;
+
+  -- Call the addQuiz procedure
+  addQuiz(v_id, v_max_marks, v_duration);
+END;
+/
+
 
 =======================================================================================
  3.⁠ ⁠*Cursor to List Questions in a Quiz*
@@ -372,33 +385,8 @@ END;
 /
 
 
-==========================================================================
-6.⁠*Procedure to Register a Student for a Quiz with User Input*
-CREATE OR REPLACE PROCEDURE registerForQuiz(p_student_id IN VARCHAR2) IS
-  v_quiz_id VARCHAR2(20);
-  v_deadline VARCHAR2(11); -- DATE changed to VARCHAR2 for input purposes
-BEGIN
-  -- Prompt user for input in SQL*Plus
-  EXECUTE IMMEDIATE 'ACCEPT v_quiz_id CHAR(20) PROMPT ''Enter quiz ID: ''';
-  EXECUTE IMMEDIATE 'ACCEPT v_deadline CHAR(11) PROMPT ''Enter deadline (DD-MON-YYYY): ''';
 
-  -- Insert the user input into the TAKES table
-  -- Convert v_deadline from VARCHAR2 to DATE
-  INSERT INTO TAKES(reg_no, id, deadline)
-  VALUES (p_student_id, v_quiz_id, TO_DATE(v_deadline, 'DD-MON-YYYY'));
 
-  -- Provide feedback
-  DBMS_OUTPUT.PUT_LINE('Student ' || p_student_id || ' registered for quiz ' || v_quiz_id || ' with deadline ' || v_deadline);
-
-  -- Commit the transaction
-  COMMIT;
-EXCEPTION
-  WHEN OTHERS THEN
-    DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
-    -- Optionally rollback changes if needed
-    ROLLBACK;
-END;
-/
 ==========================================================================================
 7.*package*
 CREATE OR REPLACE PACKAGE student_pkg AS
