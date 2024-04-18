@@ -214,6 +214,18 @@ insert into QUESTION_IS_OF values('DBS0022', 'ICT3171');
      RETURN v_total_marks;
    END;
    /
+added=====================
+DECLARE
+  v_total_marks NUMBER;
+BEGIN
+  -- Prompt the user for input using & substitution variable
+  v_total_marks := getTotalMarks('&quiz_id');
+
+  -- Output the result
+  DBMS_OUTPUT.PUT_LINE('Total Marks for Quiz ID &quiz_id: ' || v_total_marks);
+END;
+/
+==============================================================================
     ⁠
 2.⁠ ⁠*Procedure to Add a New Quiz*
    ⁠ plsql
@@ -228,8 +240,28 @@ insert into QUESTION_IS_OF values('DBS0022', 'ICT3171');
      COMMIT;
    END;
    /
+===================
+(OR)
+CREATE OR REPLACE PROCEDURE addQuiz IS
+   v_id QUIZ.id%TYPE;
+   v_max_marks QUIZ.max_marks%TYPE;
+   v_duration QUIZ.duration%TYPE;
+BEGIN
+   -- Prompt the user for input
+   v_id := '&p_id';
+   v_max_marks := &p_max_marks;
+   v_duration := &p_duration;
 
- 4.⁠ ⁠*Cursor to List Questions in a Quiz*
+   -- Insert the values into the QUIZ table
+   INSERT INTO QUIZ(id, max_marks, duration)
+   VALUES (v_id, v_max_marks, v_duration);
+
+   -- Commit the transaction
+   COMMIT;
+END;
+/
+=======================================================================================
+ 3.⁠ ⁠*Cursor to List Questions in a Quiz*
    ⁠ plsql
    CREATE OR REPLACE PROCEDURE listQuestions(quiz_id IN VARCHAR2) IS
      CURSOR c_questions IS
@@ -245,8 +277,29 @@ insert into QUESTION_IS_OF values('DBS0022', 'ICT3171');
      END LOOP;
      CLOSE c_questions;
    END;
-   
- 5.⁠ ⁠*Procedure to Update Student Password with User Input*
+   (or)==================
+CREATE OR REPLACE PROCEDURE listQuestions IS
+  v_quiz_id QUESTION_IS_OF.id%TYPE;
+  CURSOR c_questions IS
+    SELECT prompt FROM QUESTION
+    WHERE id IN (SELECT id FROM QUIZ_IS_OF WHERE sub_code = v_quiz_id);
+  v_question QUESTION.prompt%TYPE;
+BEGIN
+  -- Prompt the user for input
+  v_quiz_id := '&quiz_id';
+
+  -- Open the cursor and fetch questions
+  OPEN c_questions;
+  LOOP
+    FETCH c_questions INTO v_question;
+    EXIT WHEN c_questions%NOTFOUND;
+    DBMS_OUTPUT.PUT_LINE('Question: ' || v_question);
+  END LOOP;
+  CLOSE c_questions;
+END;
+/
+==============================================================================================
+ 4.⁠ ⁠*Procedure to Update Student Password with User Input*
    ⁠ plsql
    CREATE OR REPLACE PROCEDURE updateStudentPassword(p_reg_no IN VARCHAR2) IS
      v_new_password VARCHAR2(50);
@@ -258,8 +311,26 @@ insert into QUESTION_IS_OF values('DBS0022', 'ICT3171');
      COMMIT;
    END;
    /
+=================(OR)
+CREATE OR REPLACE PROCEDURE updateStudentPassword IS
+  v_reg_no STUDENT.reg_no%TYPE;
+  v_new_password VARCHAR2(50);
+BEGIN
+  -- Prompt the user for input
+  v_reg_no := '&p_reg_no';
+
+  -- Assuming user input is gathered through some external mechanism, like an application
+  DBMS_OUTPUT.PUT_LINE('Enter new password:');
+  EXECUTE IMMEDIATE 'ACCEPT v_new_password CHAR(50)';
+
+  -- Update the student password
+  UPDATE STUDENT SET pwd = v_new_password WHERE reg_no = v_reg_no;
+  COMMIT;
+END;
+/
+=================================================================================================== 
   
-7.⁠ ⁠*Cursor with User Input to Filter and List Quizzes by Maximum Marks*
+5.⁠ ⁠*Cursor with User Input to Filter and List Quizzes by Maximum Marks*
    ⁠ plsql
    CREATE OR REPLACE PROCEDURE filterQuizzesByMarks(p_max_marks IN NUMBER) IS
      CURSOR c_quizzes IS
@@ -275,8 +346,30 @@ insert into QUESTION_IS_OF values('DBS0022', 'ICT3171');
      CLOSE c_quizzes;
    END;
    /
+(OR)================================
+CREATE OR REPLACE PROCEDURE filterQuizzesByMarks IS
+  v_max_marks NUMBER;
+  CURSOR c_quizzes IS
+    SELECT id FROM QUIZ WHERE max_marks <= v_max_marks;
+  v_quiz_id QUIZ.id%TYPE;
+BEGIN
+  -- Prompt the user for input
+  v_max_marks := &p_max_marks;
 
-8.⁠*Procedure to Register a Student for a Quiz with User Input*
+  -- Open the cursor and fetch quizzes
+  OPEN c_quizzes;
+  LOOP
+    FETCH c_quizzes INTO v_quiz_id;
+    EXIT WHEN c_quizzes%NOTFOUND;
+    DBMS_OUTPUT.PUT_LINE('Quiz ID: ' || v_quiz_id);
+  END LOOP;
+  CLOSE c_quizzes;
+END;
+/
+
+
+==========================================================================
+6.⁠*Procedure to Register a Student for a Quiz with User Input*
 CREATE OR REPLACE PROCEDURE registerForQuiz(p_student_id IN VARCHAR2) IS
   v_quiz_id VARCHAR2(20);
   v_deadline VARCHAR2(11); -- DATE changed to VARCHAR2 for input purposes
@@ -302,4 +395,115 @@ EXCEPTION
     ROLLBACK;
 END;
 /
+==========================================================================================
+7.*package*
+CREATE OR REPLACE PACKAGE student_pkg AS
+  -- Procedure to update student password
+  PROCEDURE updateStudentPassword(p_reg_no IN VARCHAR2);
+
+  -- Procedure to filter quizzes by maximum marks
+  PROCEDURE filterQuizzesByMarks;
+
+  -- Procedure to list questions in a quiz
+  PROCEDURE listQuestions;
+
+  -- Function to get total marks for a quiz
+  FUNCTION getTotalMarks(quiz_id IN VARCHAR2) RETURN NUMBER;
+
+END student_pkg;
+/
+
+CREATE OR REPLACE PACKAGE BODY student_pkg AS
+  -- Procedure to update student password
+  PROCEDURE updateStudentPassword(p_reg_no IN VARCHAR2) IS
+    v_new_password VARCHAR2(50);
+  BEGIN
+    -- Assuming user input is gathered through some external mechanism, like an application
+    DBMS_OUTPUT.PUT_LINE('Enter new password:');
+    EXECUTE IMMEDIATE 'ACCEPT v_new_password CHAR(50)';
+    UPDATE STUDENT SET pwd = v_new_password WHERE reg_no = p_reg_no;
+    COMMIT;
+  END;
+
+  -- Procedure to filter quizzes by maximum marks
+  PROCEDURE filterQuizzesByMarks IS
+    v_max_marks NUMBER;
+    CURSOR c_quizzes IS
+      SELECT id FROM QUIZ WHERE max_marks <= v_max_marks;
+    v_quiz_id QUIZ.id%TYPE;
+  BEGIN
+    -- Prompt the user for input
+    v_max_marks := &p_max_marks;
+
+    -- Open the cursor and fetch quizzes
+    OPEN c_quizzes;
+    LOOP
+      FETCH c_quizzes INTO v_quiz_id;
+      EXIT WHEN c_quizzes%NOTFOUND;
+      DBMS_OUTPUT.PUT_LINE('Quiz ID: ' || v_quiz_id);
+    END LOOP;
+    CLOSE c_quizzes;
+  END;
+
+  -- Procedure to list questions in a quiz
+  PROCEDURE listQuestions IS
+    v_quiz_id QUESTION_IS_OF.id%TYPE;
+    CURSOR c_questions IS
+      SELECT prompt FROM QUESTION
+      WHERE id IN (SELECT id FROM QUIZ_IS_OF WHERE sub_code = v_quiz_id);
+    v_question QUESTION.prompt%TYPE;
+  BEGIN
+    -- Prompt the user for input
+    v_quiz_id := '&quiz_id';
+
+    -- Open the cursor and fetch questions
+    OPEN c_questions;
+    LOOP
+      FETCH c_questions INTO v_question;
+      EXIT WHEN c_questions%NOTFOUND;
+      DBMS_OUTPUT.PUT_LINE('Question: ' || v_question);
+    END LOOP;
+    CLOSE c_questions;
+  END;
+
+  -- Function to get total marks for a quiz
+  FUNCTION getTotalMarks(quiz_id IN VARCHAR2) RETURN NUMBER IS
+    v_total_marks NUMBER;
+  BEGIN
+    SELECT SUM(max_marks) INTO v_total_marks FROM QUIZ WHERE id = quiz_id;
+    RETURN v_total_marks;
+  END;
+
+END student_pkg;
+/
+
+-- Call the updateStudentPassword procedure
+BEGIN
+  student_pkg.updateStudentPassword('200911076');
+  DBMS_OUTPUT.PUT_LINE('Student password updated successfully.');
+END;
+
+-- Call the filterQuizzesByMarks procedure
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('Enter the maximum marks for filtering quizzes:');
+  student_pkg.filterQuizzesByMarks;
+END;
+
+-- Call the listQuestions procedure
+BEGIN
+  DBMS_OUTPUT.PUT_LINE('Enter the quiz ID to list questions:');
+  student_pkg.listQuestions;
+END;
+
+-- Call the getTotalMarks function
+DECLARE
+  v_quiz_id VARCHAR2(20) := '&quiz_id';
+  v_total_marks NUMBER;
+BEGIN
+  v_total_marks := student_pkg.getTotalMarks(v_quiz_id);
+  DBMS_OUTPUT.PUT_LINE('Total marks for quiz ' || v_quiz_id || ': ' || v_total_marks);
+END;
+==========================================================================
+
+8.*trigger*
 
