@@ -386,15 +386,13 @@ END;
    END;
    /
 (OR)================================
-CREATE OR REPLACE PROCEDURE filterQuizzesByMarks IS
-  v_max_marks NUMBER;
+CREATE OR REPLACE PROCEDURE filterQuizzesByMarks(
+  p_max_marks IN NUMBER
+) IS
   CURSOR c_quizzes IS
-    SELECT id FROM QUIZ WHERE max_marks <= v_max_marks;
+    SELECT id FROM QUIZ WHERE max_marks <= p_max_marks;
   v_quiz_id QUIZ.id%TYPE;
 BEGIN
-  -- Prompt the user for input
-  v_max_marks := &p_max_marks;
-
   -- Open the cursor and fetch quizzes
   OPEN c_quizzes;
   LOOP
@@ -403,6 +401,18 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Quiz ID: ' || v_quiz_id);
   END LOOP;
   CLOSE c_quizzes;
+END;
+/
+
+DECLARE
+  -- Declare variable to store user input
+  v_max_marks NUMBER;
+BEGIN
+  -- Prompt the user for input
+  v_max_marks := &p_max_marks;
+
+  -- Call the filterQuizzesByMarks procedure with user input
+  filterQuizzesByMarks(v_max_marks);
 END;
 /
 
