@@ -218,7 +218,7 @@ insert into QUESTION_IS_OF values('DBS0022', 'ICT3171');
 DECLARE
   v_total_marks NUMBER;
 BEGIN
-  -- Prompt the user for input using & substitution variable
+  
   v_total_marks := getTotalMarks('&quiz_id');
 
   -- Output the result
